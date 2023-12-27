@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.usu.tuition.mapper.StaffTuitionStudentMapper">
+
+	<resultMap type="kr.ac.usu.user.vo.StudentVO" id="listMap" autoMapping="true">
+		<association property="schoolRegisterHistory" javaType="kr.ac.usu.student.vo.SchoolRegisterHistoryVO" autoMapping="true" />
+	</resultMap>
+	
+	<resultMap type="kr.ac.usu.user.vo.StudentVO" id="studentInfo" autoMapping="true">
+		<association property="subject" javaType="kr.ac.usu.subject.vo.SubjectVO" autoMapping="true">
+			<association property="college" javaType="kr.ac.usu.facilities.vo.CollegeVO" autoMapping="true" />
+		</association>
+	</resultMap>
+
+	<sql id="searchFrag">
+		<where>
+	    	<if test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	    		<choose>
+	    			<when test="simpleCondition.searchType eq 'stdntNm'">
+	    				INSTR(STDNT_NM, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<when test="simpleCondition.searchType eq 'stdntNo'">
+	    				INSTR(STDNT_NO, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<when test="simpleCondition.searchType eq 'sknrgSttusMajor1'">
+	    				INSTR(SKNRG_STTUS_MAJOR1, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<otherwise>
+	    				INSTR(STDNT_NM, #{simpleCondition.searchWord}) > 0
+	    				OR
+	    				INSTR(STDNT_NO, #{simpleCondition.searchWord}) > 0
+	    				OR
+	    				INSTR(SKNRG_STTUS_MAJOR1, #{simpleCondition.searchWord}) > 0
+	    			</otherwise>
+	    		</choose>
+	    	</if>
+	    </where>
+	</sql>
+	
+	<sql id="listFromFrag">
+		SELECT 
+		    A.STDNT_NO
+		    , C.SKNRG_STTUS_GRADE
+		    , B.STDNT_NM
+		    , E.SUBJCT_NM SKNRG_STTUS_MAJOR1
+		    , G.COM_CODE_NM	SKNRGS_SE
+		FROM
+		    STUDENT A INNER JOIN STUDENT_INFORMATION B ON (A.STDNT_NO = B.STDNT_NO)
+		    INNER JOIN SCHOOL_REGISTER_STATUS C ON (A.STDNT_NO = C.STDNT_NO)
+		    LEFT OUTER JOIN GRADUATION D ON (A.STDNT_NO = D.STDNT_NO)
+		    INNER JOIN SUBJECT E ON (C.SKNRG_STTUS_MAJOR1 = E.SUBJCT_NO)
+		    INNER JOIN SCHOOL_REGISTER_HISTORY F ON (A.STDNT_NO = F.STDNT_NO)
+		    INNER JOIN COM_CODE G ON (F.SKNRGS_SE = G.COM_CODE)
+		WHERE
+		    D.STDNT_NO IS NULL
+		    AND G.COM_CODE_GRP = 'SEC009'
+		    AND (
+		        (EXTRACT(MONTH FROM SYSDATE) BETWEEN 7 AND 12 AND C.SKNRG_STTUS_GRADE != '4' AND G.COM_CODE_NM != '휴학')
+		        OR
+		        <![CDATA[
+		        (EXTRACT(MONTH FROM SYSDATE) < 7 OR EXTRACT(MONTH FROM SYSDATE) > 12 AND G.COM_CODE_NM != '휴학')			    
+		    	]]>
+		    )
+		 ORDER BY C.SKNRG_STTUS_GRADE, E.SUBJCT_NM
+	</sql>
+	
+	<!-- 납부대상자 목록 불러오기 -->
+	<select id="selectTotalRecord" resultType="int" parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM
+			(<include refid="listFromFrag" />)
+		<include refid="searchFrag" />
+	</select>
+	
+	<select id="selectTuitionStudent" resultMap="listMap" parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+		SELECT A.*
+		FROM (
+			SELECT ROWNUM RNUM, B.*
+			FROM(
+				<include refid="listFromFrag" />
+			) B
+			<include refid="searchFrag" />
+		) A
+		<![CDATA[
+	    WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+	    ]]>
+	</select>
+	
+	<select id="selectTuitionStudentInfo" resultMap="studentInfo" parameterType="string">
+		SELECT 
+		    A.STDNT_NO
+            , B.STDNT_NM
+            , D.SUBJCT_NM SKNRG_STTUS_MAJOR1
+            , E.CLG_NM
+		FROM
+		    STUDENT A INNER JOIN STUDENT_INFORMATION B ON (A.STDNT_NO = B.STDNT_NO)
+            INNER JOIN SCHOOL_REGISTER_STATUS C ON (A.STDNT_NO = C.STDNT_NO)
+            INNER JOIN SUBJECT D ON (C.SKNRG_STTUS_MAJOR1 = D.SUBJCT_NO)
+            INNER JOIN COLLEGE E ON (D.CLG_NO = E.CLG_NO)
+        WHERE A.STDNT_NO = #{studentNo}
+	</select>
+	
+
+</mapper>

@@ -1,0 +1,53 @@
+package kr.ac.usu.score.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.ac.usu.score.service.StudentScoreService;
+import kr.ac.usu.score.vo.ScoreVO;
+import kr.ac.usu.user.mapper.LoginMapper;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+public class StudentScoreController {
+	
+	@Inject
+	private StudentScoreService service;
+	
+	@GetMapping("/student/tatalScore")
+	public String studentTotalScoreView(
+			Authentication auth
+			, Model model
+		) {
+		String currSemCd = LoginMapper.getCurrentSemesterCode();
+		List<Map<String, String>> dataList = service.retrieveSemCdList(auth.getName(), currSemCd);
+		log.info("{}",dataList);
+		model.addAttribute("dataList", dataList);
+		return "student/score/studentTotalScore";
+	}
+	
+	@GetMapping("/student/ajax/scoreList/{semCd}")
+	public String studentScoreList(
+			Authentication auth
+			, @PathVariable String semCd
+			, Model model
+		) {
+		
+		List<ScoreVO> list = service.retrieveScoreList(auth.getName(), semCd);
+		double calScore = service.retrieveCalScore(auth.getName(), semCd);
+		model.addAttribute("dataList", list);
+		model.addAttribute("calScore", calScore);
+		return "jsonView";
+	}
+	
+}

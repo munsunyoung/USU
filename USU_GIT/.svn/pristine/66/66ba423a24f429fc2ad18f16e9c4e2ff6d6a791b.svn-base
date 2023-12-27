@@ -1,0 +1,27 @@
+package kr.ac.usu.user.vo;
+
+import java.io.Serializable;
+
+import lombok.Data;
+
+/**
+ * @author 김재성
+ * @since 2023.11.13
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet 
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일          수정자            수정내용
+ * --------     --------    ----------------------
+ * 2023.11.13     김재성           최초작성
+ * 
+ * Copyright (c) ${year} by DDIT All right reserved
+ * </pre>
+ */
+@Data
+public class SearchConditionVO implements Serializable {
+	
+	private String userId;
+	private String year;
+	private String semstrNo;
+}

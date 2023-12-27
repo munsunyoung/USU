@@ -1,0 +1,59 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+ <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+ <%@ taglib uri="http://www.springframework.org/security/tags" prefix="security" %>
+		        
+           
+    
+<!-- Begin Page Content -->
+<div class="container-fluid">					
+	<security:authentication property="principal" var="user"/>					
+	<div class="mypage_wrap">
+		<div class="sub_tit02">마이페이지</div>
+		
+		<!-- 나의정보 -->
+		<div class="my_content">			
+			<div class="col-xl-12">		
+				<div class="card3 row shadow mb-4">
+					<div class="card-header2 py-3">
+						<h6 class="m-0 font-weight-bold sub_tit03">인적 정보</h6>
+					</div>
+					<div class="my_profile_wrap ">
+						<div class="profile_img col-xl-3  ft_left">
+							<div class="pro_img">
+								<img src="${pageContext.request.contextPath }/resources/img/profile_img.png">
+							</div>
+						</div>
+		                      				
+						<!-- 마이페이지 테이블 -->
+						<div class="pro_table width80 ft_left">
+							<table class="table_style02 table_center">
+  								<colgroup>
+  									<col width="30%">
+  									<col width="70%">
+  								</colgroup>
+  								<tr><th>학번</th><td>${user.realUser.stdntNo }</td></tr>
+  								<tr><th>학생명</th><td>${user.realUser.stdntNm }</td></tr>
+  								<tr><th>생년월일</th><td>${user.realUser.stdntIhidnum1 }</td></tr>
+  								<tr><th>기본주소</th><td>${user.realUser.stdntAdres1 }</td></tr>
+  								<tr><th>상세주소</th><td>${user.realUser.stdntAdres2 }</td></tr>
+  								<tr><th>연락처</th><td>${user.realUser.stdntTelno }</td></tr>
+  								<tr><th>국적</th><td>${user.realUser.nltySe }</td></tr>
+  								<tr><th>성별</th><td>${user.realUser.sexdstnSe }</td></tr>
+  								<tr><th>1전공</th><td>${user.realUser.sknrgSttusMajor1 }</td></tr>
+  								<tr><th>2전공</th><td>${user.realUser.sknrgSttusMajor2 }</td></tr>
+  								<tr><th>부전공</th><td>${user.realUser.sknrgSttusMinor }</td></tr>
+  								<tr><th>입학일</th><td>${user.realUser.sknrgSttusEntsch }</td></tr>
+  								<tr><th>입학구분</th><td>${user.realUser.sknrgSttusEnterenceSe }</td></tr>
+  								<tr><th>학년</th><td>${user.realUser.sknrgSttusGrade }</td></tr>
+  								<tr><th>학적상태</th><td>${user.realUser.schoolRegisterHistory.sknrgsSe }</td></tr>			                      				
+  							</table>
+  							<button class="btn-primary small_btn ft_right mt-4">수정하기</button>
+  						</div>		                      				
+					</div>		                      		
+				</div>		
+			</div>
+		</div>
+	</div>
+ </div>
+<!-- /.container-fluid -->

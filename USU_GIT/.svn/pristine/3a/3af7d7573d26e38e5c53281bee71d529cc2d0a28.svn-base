@@ -1,0 +1,28 @@
+package kr.ac.usu.lecture.service;
+
+import java.util.List;
+import java.util.Map;
+
+import kr.ac.usu.lecture.vo.LectureVO;
+import kr.ac.usu.lecture.vo.StudentAttendanceLectureVO;
+import kr.ac.usu.paging.vo.PaginationInfo;
+
+public interface StudentAttndanceLectureService {
+	
+	/**
+	 * 수강신청 가능한 학점
+	 * 학생 학번 key : id
+	 * 직전 학기코드 key : prevSemCd
+	 * 수강신청학기코드 key : currSemCd
+	 * @param paramMap
+	 * @return
+	 */
+	public int getRequestablePoint(Map<String,String> paramMap);
+	
+	public int getRequestableLectureListTotalCount(PaginationInfo<LectureVO> paging);
+	public List<LectureVO> getRequestableLectureList(PaginationInfo<LectureVO> paging);
+	
+	public int insertAttendanceLecture(StudentAttendanceLectureVO attendance);
+	
+	public int deleteAttendanceLecture(StudentAttendanceLectureVO attendance);
+}

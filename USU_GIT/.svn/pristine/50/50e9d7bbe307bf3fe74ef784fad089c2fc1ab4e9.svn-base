@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="kr.ac.usu.classroom.mapper.StudentClassRoomMapper">
+<!--  [[개정이력(Modification Information)]]       -->
+<!--  수정일            수정자       수정내용               -->
+<!--  ==========      ======    ==============        -->
+<!--  2023. 11. 27.     김석호     최초작성               -->
+<!--  Copyright (c) 2023 by DDIT All right reserved -->
+	<resultMap type="kr.ac.usu.lecture.vo.LectureVO" id="lecture" autoMapping="true">
+		<id property="lctreNo" column="LCTRE_NO"/>
+		<association property="professor" javaType="kr.ac.usu.user.vo.ProfessorVO" autoMapping="true" />
+		<association property="course" javaType="kr.ac.usu.course.vo.CourseVO" autoMapping="true" />
+		<collection property="timetable" ofType="kr.ac.usu.lecture.vo.LectureTimetableVO" autoMapping="true">
+		</collection>
+	</resultMap>
+	
+	<resultMap type="kr.ac.usu.classroom.vo.TestQuestionVO" id="testQuestion" autoMapping="true">
+		<id property="atchFileNo" column="ATCH_FILE_NO"/>
+		<association property="lecture" javaType="kr.ac.usu.lecture.vo.LectureVO" autoMapping="true">
+			<association property="course" javaType="kr.ac.usu.course.vo.CourseVO" autoMapping="true" />
+		</association>
+	</resultMap>
+	
+	<select id="selectClassRoomList" resultMap="lecture" parameterType="HashMap" >
+		SELECT
+		    AL.LCTRE_NO
+		    , C.COURSE_NM
+		    , P.PRFSOR_NM
+		    , (SELECT COM_CODE_NM FROM COM_CODE WHERE COM_CODE_GRP = 'SEC014' AND COM_CODE = L.COMPL_SE) COMPL_SE
+		    , (SELECT COM_CODE_NM FROM COM_CODE WHERE COM_CODE_GRP = 'SEC015' AND COM_CODE = L.LCTRE_SE) LCTRE_SE
+		FROM
+		    ATTENDANCE_LECTURE AL
+		        INNER JOIN LECTURE L ON (L.LCTRE_NO = AL.LCTRE_NO)
+		        INNER JOIN PROFESSOR P ON (P.PRFSOR_NO = L.PRFSOR_NO)
+		        INNER JOIN COURSE C ON (C.COURSE_NO = L.COURSE_NO)
+		        INNER JOIN CLASSROOM CR ON (CR.LCTRE_NO = L.LCTRE_NO)
+		WHERE
+			STDNT_NO = #{id}
+		AND
+			L.SEMSTR_SE = #{semCd}
+	</select>
+	
+	<select id="selectHomeWorkList" parameterType="kr.ac.usu.lecture.vo.LectureVO" resultType="kr.ac.usu.classroom.vo.ClassroomBoardVO">
+		SELECT
+		     CB.CR_NO
+		    , (SELECT COM_CODE_NM FROM COM_CODE WHERE COM_CODE_GRP = 'SEC020' AND COM_CODE = CB.CR_SE) CR_SE_NM
+		    , CB.CR_TITLE
+		    , CB.CR_CN
+		    , CB.CR_WRTER
+		    , CB.CR_DATE
+		    , CB.ATCH_FILE_NO
+		    , CB.LCTRE_NO
+		FROM
+		    ATTENDANCE_LECTURE AL
+		        INNER JOIN LECTURE L ON (L.LCTRE_NO = AL.LCTRE_NO)
+		        INNER JOIN CLASSROOM CR ON (CR.LCTRE_NO = L.LCTRE_NO)
+		        INNER JOIN CLASSROOM_BOARD CB ON (CB.LCTRE_NO = CR.LCTRE_NO)
+		WHERE
+			CB.CR_SE = '01'
+		AND
+			L.SEMSTR_SE = #{semCd}
+		AND
+			AL.STDNT_NO = #{id}
+		AND
+			CB.LCTRE_NO = #{lctreNo}
+	</select>
+	
+	<select id="selectTestQuestionList" parameterType="HashMap" resultMap="testQuestion">
+		SELECT
+		    COURSE_NM
+		    , (SELECT COM_CODE_NM FROM COM_CODE WHERE COM_CODE_GRP = 'SEC021' AND COM_CODE = TQ.TEST_SE) TEST_SE_NM
+		    , TQ.TEST_SE
+		    , TQ.LCTRE_NO
+		    , (SELECT COUNT(1) FROM TEST_ANSWER_PAPER WHERE LCTRE_NO = TQ.LCTRE_NO AND TEST_SE = TQ.TEST_SE) QUESTION_CNT
+		    , CASE WHEN
+		    (SELECT NVL(COUNT(1),0) FROM SUBMIT_ANSWER_PAPER WHERE LCTRE_NO = TQ.LCTRE_NO AND TEST_SE = TQ.TEST_SE AND STDNT_NO = AL.STDNT_NO) > 0
+		    THEN '응시완료'
+		    ELSE '미응시' END AS QUESTIONABLE
+		FROM
+		    TEST_QUESTION TQ
+		        INNER JOIN LECTURE L ON (L.LCTRE_NO = TQ.LCTRE_NO)
+		        INNER JOIN COURSE C ON (C.COURSE_NO = L.COURSE_NO)
+		        INNER JOIN ATTENDANCE_LECTURE AL ON (AL.LCTRE_NO = L.LCTRE_NO)
+		WHERE
+		    TQ.LCTRE_NO = #{lctreNo}
+		AND
+		    AL.STDNT_NO = #{id}
+		AND
+		    L.SEMSTR_SE = #{semCd}
+	</select>
+	<select id="selectTestQuestion" parameterType="kr.ac.usu.classroom.vo.TestVO" resultType="kr.ac.usu.classroom.vo.TestQuestionVO">
+		SELECT
+		    TQ.TEST_SE
+		    , TQ.LCTRE_NO
+		    , TQ.ATCH_FILE_NO
+		FROM
+		    TEST_QUESTION TQ
+		        INNER JOIN ATTENDANCE_LECTURE AL ON (AL.LCTRE_NO = TQ.LCTRE_NO)
+		WHERE
+			TQ.LCTRE_NO = #{lctreNo}
+		AND
+			AL.STDNT_NO = #{stdntNo}
+		AND
+			TQ.TEST_SE = #{testSe}
+	</select>
+	
+	<select id="selectAttatchingFileList" parameterType="String" resultType="kr.ac.usu.board.vo.AttatchingFileVO">
+		SELECT
+		    ATCH_FILE_NO
+		    , ATCH_FILE_SN
+		    , ATCH_FILE_NM
+		    , ATCH_FILE_STRE_NM
+		    , ATCH_FILE_STRE_PATH
+		    , ATCH_FILE_MG
+		    , ATCH_FILE_INDICT_MG
+		    , ATCH_FILE_MIME_TYPE
+		FROM
+		    ATTACHING_FILE
+		WHERE
+			ATCH_FILE_NO = #{atchFileNo}
+	</select>
+	
+</mapper>

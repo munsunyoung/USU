@@ -1,0 +1,49 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %> 
+
+<div class="homework_wrap mb-4">
+     <div class="table_style01 mt-4 mb-4 table_center">
+  				<div class="profile_img col-xl-3 ft_left ">
+  					<div class="pro_img width80">                  						
+  						<table class="table_style02 table_center">
+    					<colgroup>
+    						<col width="30%">
+    						<col width="20%">
+    						<col width="60%">
+    					</colgroup>
+    					<tr><td rowspan="6"><img height="152px" width="115px" src="${pageContext.request.contextPath }/resources/img/profile_img.png"></td></tr>
+    					<tr>
+    						<th>학번</th><td>${student.stdntNo}</td>
+    					</tr>
+    					<tr>
+    						<th>학생명</th><td>${student.stdntNm}</td>
+    					</tr>
+    					<tr>
+    						<th>학과</th><td>${student.subject.subjctNm}</td>
+    					</tr>
+   					</table>
+  					</div>
+  				</div>
+  				<div class="pro_table width80 ft_left">
+   				<table class="table_style02 table_center">
+   					<colgroup>
+   						<col width="30%">
+   						<col width="70%">
+   					</colgroup>
+					<tr><th>생년월일</th><td>${user.realUser.stdntIhidnum1 }</td></tr>
+   					<tr><th>기본주소</th><td>${user.realUser.stdntAdres1 }</td></tr>
+   					<tr><th>상세주소</th><td>${user.realUser.stdntAdres2 }</td></tr>
+   					<tr><th>연락처</th><td>${user.realUser.stdntTelno }</td></tr>
+   					<tr><th>국적</th><td>${user.realUser.nltySe }</td></tr>
+   					<tr><th>성별</th><td>${user.realUser.sexdstnSe }</td></tr>
+   					<tr><th>1전공</th><td>${user.realUser.sknrgSttusMajor1 }</td></tr>
+   					<tr><th>2전공</th><td>${user.realUser.sknrgSttusMajor2 }</td></tr>
+   					<tr><th>부전공</th><td>${user.realUser.sknrgSttusMinor }</td></tr>
+   					<tr><th>입학일</th><td>${user.realUser.sknrgSttusEntsch }</td></tr>
+   					<tr><th>입학구분</th><td>${user.realUser.sknrgSttusEnterenceSe }</td></tr>
+   				
+   				</table>
+  				</div>
+     </div>
+ </div>

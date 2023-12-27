@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--  [[개정이력(Modification Information)]]       -->
+<!--  수정일            수정자       수정내용               -->
+<!--  ==========      ======    ==============        -->
+<!--  2023. 11. 20.}     김석호     최초작성               -->
+<!--  Copyright (c) 2023 by DDIT All right reserved -->
+<mapper
+	namespace="kr.ac.usu.common.mapper.CommonOptionsMapper">
+	<select id="getComplSeList" resultType="HashMap">
+		SELECT
+		    COM_CODE KEY
+		    , COM_CODE_NM VALUE
+		FROM
+		    COM_CODE
+		    WHERE COM_CODE_GRP = 'SEC014'
+		    ORDER BY COM_CODE_SEQ ASC
+	</select>
+	<select id="getcoursePntList" resultType="HashMap">
+		SELECT DISTINCT
+			COURSE_PNT KEY
+			, COURSE_PNT ||'학점' VALUE
+		FROM
+			COURSE
+		ORDER BY COURSE_PNT ASC
+	</select>
+	
+	<select id="getLectureDayOfWeekList" resultType="HashMap">
+		SELECT DISTINCT
+		    SUBSTR(COM_CODE,1,1) KEY
+		    , SUBSTR(COM_CODE_NM,1,1) VALUE
+		FROM
+		    COM_CODE
+		WHERE
+		    COM_CODE_GRP = 'SEC011'
+		ORDER BY KEY ASC
+	</select>
+	
+</mapper>

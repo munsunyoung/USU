@@ -1,0 +1,78 @@
+/**
+ * <pre>
+ * 
+ * </pre>
+ * @author 문선영
+ * @since 2023. 11. 13.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일        수정자       수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 13.      문선영       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */ 
+ $(function(){
+	  
+	//------------------------------------------------------------------------------------------------
+ 	
+ 	function makeTrTag(consultationRequest){
+		let trTag = `
+			<tr>
+                <td>${consultationRequest.rnum}</td>
+                <td>${consultationRequest.student.stdntNm}</td>
+                <td>${consultationRequest.stdntNo}</td>
+                <td>${consultationRequest.student.sknrgSttusMajor1}</td>             
+                <td>${consultationRequest.cnsltRequstProcess}</td>
+            </tr>
+		`; 
+		return trTag;
+	 };
+	 
+	//------------------------------------------------------------------------------------------------
+	
+	$("#searchForm").on("submit", function(event){
+		event.preventDefault();
+		let data = $(this).serialize();
+		$.getJSON(`/staff/consultation/ajax/consultationRequest?${data}`, function(resp){   // 요청 URL 설정 controller에 정해놓은거
+			let consultationRequestList = resp.paging.dataList;
+			let trTags = null;
+			if(consultationRequestList.length > 0){
+				$.each(consultationRequestList, function(idx, consultationRequest){
+					trTags += makeTrTag(consultationRequest);
+				});
+				$(pagingArea).html(resp.paging.pagingHTML);
+			}else{
+				trTags += `
+					<tr>
+						<td colspan="5" style="text-align: center;">상담 신청 목록이 없습니다.</td>
+					</tr>
+				`;
+				$(pagingArea).empty();
+			}
+			$("#listBody").html(trTags);
+		});
+		return false;
+	}).submit();
+	
+	//------------------------------------------------------------------------------------------------
+	
+	$("#searchUI").on("click", "#searchBtn", function(event){
+        let inputs = $(this).parents("#searchUI").find(":input[name]");
+        $.each(inputs, function(idx, ipt){
+            let name = ipt.name;
+            let value = $(ipt).val();
+            $(searchForm).find(`:input[name=${name}]`).val(value);
+            });
+            $(searchForm).submit();
+    });
+        
+    //------------------------------------------------------------------------------------------------
+        	
+ });
+ function fn_paging(page){
+	searchForm.page.value = page;
+	searchForm.requestSubmit();
+	searchForm.page.value = "";
+}

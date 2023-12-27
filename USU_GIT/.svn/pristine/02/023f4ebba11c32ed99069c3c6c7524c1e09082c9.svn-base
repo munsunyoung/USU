@@ -1,0 +1,42 @@
+package kr.ac.usu.common.mapper;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.annotations.Mapper;
+
+/**
+ * 공통코드 등의 목록을 가져갈때 사용하려고 만든 Mapper
+ * @author 김석호
+ * @since 2023. 11. 20.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet 
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일               수정자          수정내용
+ * --------         --------    ----------------------
+ * 2023. 11. 20.      김석호         최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Mapper
+public interface CommonOptionsMapper {
+
+	/**
+	 * 과목 이수구분
+	 * @return
+	 */
+	public List<Map<String,String>> getComplSeList();
+	/**
+	 * 과목 학점
+	 * @return
+	 */
+	public List<Map<String,String>> getcoursePntList();
+	/**
+	 * 시간표 요일목록
+	 * @return
+	 */
+	public List<Map<String,String>> getLectureDayOfWeekList();
+	
+	
+}

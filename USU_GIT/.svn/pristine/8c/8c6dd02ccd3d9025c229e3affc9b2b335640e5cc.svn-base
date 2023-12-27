@@ -1,0 +1,109 @@
+package kr.ac.usu.lecture.controller;
+
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.ac.usu.course.vo.CourseVO;
+import kr.ac.usu.facilities.vo.CollegeVO;
+import kr.ac.usu.lecture.mapper.ProfessorLectureMapper;
+import kr.ac.usu.lecture.service.ProfessorLecturetService;
+import kr.ac.usu.lecture.vo.LectureVO;
+import kr.ac.usu.paging.BootstrapPaginationRenderer;
+import kr.ac.usu.paging.vo.PaginationInfo;
+import kr.ac.usu.paging.vo.SearchVO;
+import kr.ac.usu.subject.vo.SubjectVO;
+import kr.ac.usu.user.vo.SearchConditionVO;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * 
+ * @author PC-25
+ *
+ * @author 이재혁
+ * @since 2023. 11. 7.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet 
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일                          수정자               수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 7.      			  이재혁              최초작성
+ * 2023. 11.10.      			  김재성				수강중인 강의 목록 불러오기
+ * 2023. 11.13.      			  김재성				수강중인 강의 ajax 비동기 요청
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Slf4j
+@Controller
+@RequiredArgsConstructor
+public class ProfessorLectureController {
+	
+	private final ProfessorLecturetService service;
+	
+	//강의목록 UI
+	@GetMapping("/professor/lectureListUI")
+	public String LectureListUI() {
+		
+		return "/professor/lecture/lectureRetrieveLectureList";
+	}
+	
+	//비동기식 검색조건 강의목록 리스트
+	@GetMapping("ajax/lectureList")
+	@ResponseBody
+	public List<LectureVO> lectureList(SearchConditionVO searchCondition,Authentication principal) {
+		
+		SearchConditionVO search = new SearchConditionVO();
+		String userId = principal.getName();
+		
+		search.setUserId(userId);
+		search.setYear(searchCondition.getYear());
+		search.setSemstrNo(searchCondition.getSemstrNo());
+		
+		log.info("검색조건 값 {}",search);
+		List<LectureVO> lectureList = service.retrieveLectureList(search);
+		
+		return lectureList;
+	}
+	
+	// 교과목 목록 UI
+	@GetMapping("/professor/courseListUI")
+	public String courseListUI() {
+		
+		return "professor/lecture/courseRetrieveList";
+	}
+	
+	// 교과목 검색조건 페이징 리스트 
+	@GetMapping("ajax/courseList")
+	public String courseList(
+		@ModelAttribute("simpleCondition") SearchVO simpleCondition
+		, @RequestParam(value="page", required = false, defaultValue = "1") int currentPage
+		, Model model
+	) {
+		
+		PaginationInfo<CourseVO> paging = new PaginationInfo<>(10,5);
+		paging.setSimpleCondition(simpleCondition);
+		paging.setCurrentPage(currentPage);
+		
+		service.retrieveCourseList(paging);
+		
+		paging.setRenderer(new BootstrapPaginationRenderer());
+		
+		model.addAttribute("paging", paging);
+		
+		return "jsonView";
+	}
+	
+	
+	
+}

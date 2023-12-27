@@ -1,0 +1,181 @@
+/**
+ * <pre>
+ * 
+ * </pre>
+ * @author 문선영
+ * @since 2023. 11. 29.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일        수정자       수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 29.      문선영       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */ 
+ $(function(){
+	//------------------------------------------------------------------------------------------------
+	
+	$("#modal_open").on('show.bs.modal', function () {	   		
+	    $("#prfsorTelno").val($('#tel').val());
+	    $("#sample6_postcode").val($('#add1').val());
+	    $("#sample6_address").val($('#add2').val());
+	    $("#sample6_detailAddress").val($('#add3').val());
+	});
+	
+	$("#modifyPass").on('hidden.bs.modal', function () {	   		
+	    $("#pass1").val('');
+	    $("#pass2").val('');
+	});
+	
+	//------------------------------------------------------------------------------------------------
+	 
+	$(".modifyMypage").click(function(){
+		$("#modal_open").modal('hide');
+	});
+	
+	$(".modifyPassClose").click(function(){
+		$("#modifyPass").modal('hide');
+	});
+	
+	//------------------------------------------------------------------------------------------------
+	
+	$("#zipBtn").on("click", function(){
+		 sample6_execDaumPostcode();
+	});
+	
+	//------------------------------------------------------------------------------------------------
+
+	$("#updateMypage").on("submit", function(e){
+		e.preventDefault();
+		let data = $(this).serialize();
+		console.log(data);
+		let settings = {
+			url : "/professor/mypage/updateMypage"
+			, method : "POST"
+			, data : data
+			// , data : JSON.stringify(data)
+			, dataType : 'json'
+			// , contentType : 'application/json; charset=utf-8'
+			, success : function(resp){
+				//console.log("success function 첫줄");
+				if(resp.success){
+					alert(resp.message);
+					location.reload();
+				}else{
+					alert(resp.message);
+				}
+			}
+			, error : function(xhr, status, err){
+				console.log(err);
+				alert("잘못된 요청 발생!");
+			}
+		};
+		$.ajax(settings);
+	});
+
+	//------------------------------------------------------------------------------------------------
+
+	$('#updatePass').on("submit",function(e) {
+		e.preventDefault();
+		
+        var realPass = $("#pass1").val();
+        var inputPass = $("#pass2").val();
+        
+        let data = $(this).serialize();
+        
+        if(!realPass || realPass.trim() === ""){
+            alert("현재 비밀번호를 입력하세요.");
+        }else if(!inputPass || inputPass.trim() === ""){
+			alert("변경할 비밀번호를 입력하세요.");
+		} else{
+            $.ajax({
+                type: 'post',
+                url: '/professor/mypage/checkPass',
+                data: data,
+                datatype: "text"
+            }).done(function(result){
+                console.log("보내짐------------",result);
+                if(result){
+                    console.log("비밀번호 일치");
+                    // 비밀번호 일치하면 업데이트 함수 호출
+                    updatePass(data);
+                    location.reload();
+                } else if(!result){
+                    console.log("비밀번호 틀림");
+                    // 비밀번호가 일치하지 않으면
+                    alert("비밀번호가 맞지 않습니다.");
+                   location.reload();
+                }
+            }).fail(function(error){
+                alert(JSON.stringify(error));
+            })
+        }
+    });
+	
+ });
+ 
+ // 우편번호 검색
+ function sample6_execDaumPostcode() {
+    new daum.Postcode({
+        oncomplete: function(data) {
+            var addr = '';
+            var extraAddr = '';
+
+            if (data.userSelectedType === 'R') {
+                addr = data.roadAddress;
+            } else { 
+                addr = data.jibunAddress;
+            }
+            
+            document.getElementById('sample6_postcode').value = data.zonecode;
+            document.getElementById("sample6_address").value = addr;
+            document.getElementById("sample6_detailAddress").focus();
+        }
+    }).open();
+}
+
+// 비밀번호 변경
+function updatePass(data){
+	const confirmCheck = confirm("수정하시겠습니까?");	
+	console.log("checkPass 확인----",data);
+	
+	if(confirmCheck == true){
+        $.ajax({
+            type: 'post',
+            url: '/professor/mypage/updatePass',
+            data: data
+        }).done(function(result){
+			console.log(result);
+            if(result){
+                alert("비밀번호 수정이 완료되었습니다.");
+            } else{
+                alert("변경 실패");
+            }
+        }).fail(function(error){
+            alert(JSON.stringify(error));
+        });
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

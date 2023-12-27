@@ -1,0 +1,59 @@
+package kr.ac.usu.student.service.impl;
+
+import org.springframework.stereotype.Service;
+
+import kr.ac.usu.common.exception.StudentNotFoundException;
+import kr.ac.usu.student.mapper.StudentMypageMapper;
+import kr.ac.usu.student.service.StudentMypageService;
+import kr.ac.usu.user.vo.StudentVO;
+import lombok.RequiredArgsConstructor;
+
+/**
+ * <pre>
+ * 
+ * </pre>
+ * @author 문선영
+ * @since 2023. 11. 29.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일        수정자       수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 29.      문선영       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */ 
+@Service
+@RequiredArgsConstructor
+public class StudentMypageServiceImpl implements StudentMypageService{
+	
+	private final StudentMypageMapper mapper;
+	
+	// 학생 인적 정보
+	@Override
+	public StudentVO retrieveStudentInfo(String stdntNo) {
+		StudentVO studentInfo = mapper.selectStudentInfo(stdntNo);
+		if(studentInfo==null) {
+			throw new StudentNotFoundException();
+		}
+		return studentInfo;
+	}
+
+	// 학생 학적 정보
+	@Override
+	public StudentVO retrieveStudentRegisterStatus(String stdntNo) {
+		StudentVO studentRegister = mapper.selectStudentRegisterStatus(stdntNo);
+		if(studentRegister==null) {
+			throw new StudentNotFoundException();
+		}
+		return studentRegister;
+	}
+
+	// 내정보 수정
+	@Override
+	public int modifyMypage(StudentVO stdntNo) {
+		int res = mapper.updateMypage(stdntNo);
+		return res;
+	}
+
+}

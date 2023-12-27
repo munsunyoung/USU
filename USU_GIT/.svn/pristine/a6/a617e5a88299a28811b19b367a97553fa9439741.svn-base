@@ -1,0 +1,58 @@
+/**
+ * <pre>
+ * 
+ * </pre>
+ * @author 김원희
+ * @since 2023. 11. 16.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일        수정자       수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 16.     김원희       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+
+function saveMail() {
+
+	var emailSender = document.getElementById('userId').value;
+
+	var emailRcver = document.getElementById('emailRcver').value;
+	var emailTitle = document.getElementById('emailTitle').value;
+	var emailCn = document.getElementById('emailCn').value;
+
+
+	var dataToSend = {
+		emailSender: emailSender,
+		emailRcver: emailRcver,
+		emailTitle: emailTitle,
+		emailCn: emailCn
+	};
+
+	$.ajax({
+		type: "post",
+		url: `/${actorForMail}/mail/saveMail`,
+		contentType: "application/json",
+
+		data: JSON.stringify(dataToSend),
+		success: function(response) {
+			if (response === 'success') {
+				alert("성공했습니다");
+				let settings = {
+					url: `/${actorForMail}/mail/mailList`,  // 메일 쓰기와 관련된 URL로 수정
+					method: "GET",            // GET 또는 POST에 따라 적절히 수정
+					dataType: "html"
+				};
+				location.href=`/${actorForMail}/mail/mailList`;
+			} else {
+				alert("발송 실패");
+			}
+		},
+		error: function(error) {
+			console.error(error);
+		}
+
+	});
+
+}

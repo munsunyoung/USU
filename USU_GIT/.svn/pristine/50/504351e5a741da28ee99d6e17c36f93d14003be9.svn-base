@@ -1,0 +1,78 @@
+package kr.ac.usu.lecture.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.sound.midi.MidiDevice.Info;
+
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import kr.ac.usu.lecture.vo.StudentAttendanceLectureVO;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * 
+ * @author 이재혁
+ * @since 2023. 11. 7.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet 
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일              수정자               수정내용
+ * --------     --------    ---------------------------------------
+ * 2023. 11. 7.      이재혁      최초작성
+ * 2023. 11. 11.     김석호      실시간 수강신청용 websocketHandler로 구현
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Slf4j
+public class StudentAttendanceLectureController extends TextWebSocketHandler {
+	
+	private static List<WebSocketSession> sessions = new ArrayList<>();
+	
+	
+	@Override
+	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+		sessions.add(session);
+		log.info("들어옴.. {}", session);
+	}
+	
+	@Override
+	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+		// 여기서 수강신청에 대한 로직을 처리할 예정
+		log.info("{}",message);
+		
+		
+		// 로직 처리 ( 아마 여기서 트랜잭션으로 관리해줘야할듯 )
+		
+		
+		// 로직처리 결과를 메시지로 만든다
+		StudentAttendanceLectureVO res = new StudentAttendanceLectureVO();
+		res.setCommand("TEST");
+		res.setLctreNo(null);
+		res.setMessage("테스트용");
+		res.setStdntNo(session.getPrincipal().getName());
+		
+		for(WebSocketSession target : sessions) {
+			goMessage(session, res);
+		}
+	}
+	
+	@Override
+	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+		sessions.remove(session);
+		log.info("나감.. {}" , session);
+	}
+	
+	private void goMessage(WebSocketSession session, StudentAttendanceLectureVO message) throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		String target = objectMapper.writeValueAsString(message);
+		session.sendMessage(new TextMessage(target));
+	}
+}

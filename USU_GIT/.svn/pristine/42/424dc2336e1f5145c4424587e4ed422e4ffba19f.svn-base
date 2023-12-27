@@ -1,0 +1,79 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/security/tags"
+	prefix="security"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
+<security:authentication property="principal" var="principal" />
+<style>
+.box_tit01 {
+	width: 100%;
+	border-radius: 3px;
+	text-align: center;
+	line-height: 40px;
+	height: 40px;
+	background: #f3f3f3;
+	border-top: 2px solid #b2c1d4;
+	font-size: 18px;
+	color: #6b8bb9;
+}
+
+.tit02 {
+	font-size: 18px;
+}
+
+.textbox {
+	min-height: 150px;
+	overflow-y: scroll
+}
+
+.lectureroom {
+	width: 50%;
+	float: left;
+}
+
+.ft-left {
+	float: left;
+}
+
+.wd50 {
+	width: 50%;
+}
+</style>
+
+<div class="sub_tit03">
+	<span></span>시험
+</div>
+<div class="sub_top_wrap"></div>
+<input type="hidden" value="${lctreNo}" id="selectLctreNoUsingData" />
+<input id="#addTestBtn" type="button" value="시험추가" class="btn btn-info ft_right" 
+								 data-toggle="modal" data-target="#modal_open" />
+
+<div>
+	<table class="table table_style01 mt-4 table_center" id="dataTable"
+		width="35%" cellspacing="0">
+		<thead>
+		<colgroup>
+			<col width="5%">
+			<col width="10%">
+			<col width="20%">
+			<col width="10%">
+			<col width="10%">
+		</colgroup>
+		<tr>
+			<th>시험구분</th>
+			<th>학기</th>
+			<th>강의구분</th>
+			<th>이수구분</th>
+			<th>상세보기</th>
+		</tr>
+		</thead>
+		
+		<tbody id="listBody"></tbody>
+	
+	</table>
+</div>
+<script>
+
+</script>
+<script src="${pageContext.request.contextPath}/resources/js/app/kjs/professorClassroomTestView.js"></script>

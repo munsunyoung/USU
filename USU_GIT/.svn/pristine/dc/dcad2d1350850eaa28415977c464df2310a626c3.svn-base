@@ -1,0 +1,185 @@
+/**
+ * <pre>
+ * 
+ * </pre>
+ * @author 김원희
+ * @since 2023. 11. 9.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일        수정자       수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 9.      김원희       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+
+
+$(function() {
+
+	//------------------------------------------------------------------------------------------------
+
+	function makeTrTag(club) {
+		let trTag = `
+			<tr data-club-no="${club.clubNo}" id="open_modal" data-toggle="modal" data-target="#modal_open">
+                <td>${club.rnum}</td>
+                <td>${club.clubSe}</td>
+                <td>${club.clubNm}</td>
+                <td>${club.facilities.building.buldNm}</td>    
+/*                <td>${club.student.stdntNm}</td>*/
+                <!--<td><button class="open_modal" class="btn blue_btn small_btn" data-toggle="modal" data-target="#modal_open">가입하기</button></td>-->
+                <td><button type="button" class="club-btn btn btn-primary" data-club-no="${club.clubNo}" data-rnum="${club.rnum}" data-club-se="${club.clubSe}" data-club-nm="${club.clubNm}"  >가입하기</button> 
+            </tr>
+		`;
+		return trTag;
+	};
+
+
+	//------------------------------------------------------------------------------------------------
+
+	$("#searchForm").on("submit", function(event) {
+		event.preventDefault();
+		let data = $(this).serialize();
+		$.getJSON(`/student/club/ajax/clubList?${data}`, function(resp) {   // 요청 URL 설정 controller에 정해놓은거
+
+
+			let clubList = resp.paging.dataList;
+			let trTags = null;
+			if (clubList.length > 0) {
+				$.each(clubList, function(idx, club) {
+					trTags += makeTrTag(club);
+				});
+				$(pagingArea).html(resp.paging.pagingHTML);
+			} else {
+				trTags += `
+					<tr>
+						<td colspan="6" style="text-align: center;">등록된 동아리가 없습니다.</td>
+					</tr>
+				`;
+
+				$(pagingArea).empty();
+			}
+			$("#listBody").html(trTags);
+		});
+		return false;
+	}).submit();
+	
+	
+	
+	
+
+	//------------------------------------------------------------------------------------------------
+
+	$("#searchUI").on("click", "#searchBtn", function(event) {
+		let inputs = $(this).parents("#searchUI").find(":input[name]");
+		$.each(inputs, function(idx, ipt) {
+			let name = ipt.name;
+			let value = $(ipt).val();
+			$(searchForm).find(`:input[name=${name}]`).val(value);
+		});
+		$(searchForm).submit();
+	});
+
+	//------------------------------------------------------------------------------------------------
+
+	$("#modal_open").on("show.bs.modal", function(event) {
+		let $modal = $(this);
+		let trTag = event.relatedTarget;
+		let what = $(trTag).data("clubNo");
+		let url = "/student/club/ajax/clubView?what=" + what;
+		$.get(url)
+			.done(function(resp) {
+				$modal.find(".modal-body").html(resp);
+			});
+	}).on("hidden.bs.modal", function(event) {
+		$(this).find(".modal-body").empty();
+	});
+
+	//------------------------------------------------------------------------------------------------
+
+	$(".close").click(function() {
+		$("#modal_open").modal('hide');
+	});
+
+});
+
+
+
+
+
+
+
+function fn_paging(page) {
+	searchForm.page.value = page;
+	searchForm.submit();  // 이 부분을 수정해보세요.
+	searchForm.page.value = "";
+}
+
+$(document).on("click", ".blue_btn", function() {
+	// 가입하기 버튼이 클릭되었을 때 처리할 코드
+	let clubName = $(this).closest("tr").find("td:eq(2)").text(); // 동아리명 가져오기
+
+
+	$.ajax({
+		type: "GET",
+		url: "/student/club/accept",
+		data: { clubNo: clubName }, // 필요한 데이터 전달
+		success: function(resp) {
+			console.log("체킁:", resp)
+			// 가입 페이지로 이동
+			location.href = resp.redirectUrl; // 가입 페이지의 URL을 서버에서 전달받아 이동
+		},
+		error: function(error) {
+			console.error("Error:", error);
+		}
+	});
+});
+
+$(document).on("click", ".club-btn", function(event) {
+	//var modal = new bootstrap.Modal(document.getElementById("modal_open"));
+	//modal.show();
+	//<td><button type="button" class="club-btn" data-rnum="${club.rnum}" data-club-se="${club.clubSe}" data-club-nm="${club.clubNm}"  >가입하기</button>   
+	let clubNo = $(event.target).data("clubNo");
+	console.log("clubNo:", clubNo);
+
+	$.ajax({
+		type: "GET",
+		url: "/student/club/accept",
+		data: { clubNo: clubNo }, // 필요한 데이터 전달
+		success: function(resp) {
+
+			console.log("체킁:", resp)
+			if (!resp) {
+				Swal.fire("미안해용 지금은 암것도 없어용");
+			}
+
+			// 가입 페이지로 이동  일단 보류!
+			//location.href = resp.redirectUrl; // 가입 페이지의 URL을 서버에서 전달받아 이동
+		},
+		error: function(error) {
+			console.error("Error:", error);
+		}
+	});
+
+	/*
+	console.log($(event.target));
+	let params = new URLSearchParams();
+	params.append("clubNo", clubNo);
+	let url = "/student/club/accept?" + params.toString();
+	*/
+	//window.location.href = url;
+});
+/*
+$('#modal_open').on('shown.bs.modal', function(event) {
+	// 모달이 표시될 때 실행할 코드
+	console.log('open');
+	let clickBtn = $(event.relatedTarget);
+	const clubName = clickBtn.data("clubNm");
+	console.log(clubName);
+});
+
+$('#modal_open').on('hidden.bs.modal', function(event) {
+	// 모달이 닫힐 때 실행할 코드
+	console.log('close');
+});
+*/

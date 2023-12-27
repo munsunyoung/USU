@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.usu.student.mapper.StaffFreshManMapper">
+
+	<insert id="excelUpload" parameterType="kr.ac.usu.student.vo.FreshManVO">
+		INSERT ALL 
+		  INTO student 
+		    (
+		        stdnt_no
+		        , stdnt_password
+		    <foreach collection="excelContent" item="item" separator=",">
+		    ) VALUES 
+		    (
+		        #{item.A}
+		        , #{item.B}
+		    )
+		  INTO student_information (
+		        stdnt_no
+		        , stdnt_nm
+		        , stdnt_ihidnum1
+		        , stdnt_ihidnum2
+		        , stdnt_zip
+		        , stdnt_adres1
+		        , stdnt_adres2
+		        , stdnt_telno
+		        , nlty_se
+		        , sexdstn_se
+		        , bank_se
+		        , stdnt_acnutno
+		    ) VALUES 
+		    (
+		        #{item.A}
+		        , #{item.C}
+		        , #{item.D}
+		        , #{item.E}
+		        , #{item.F}
+		        , #{item.G}
+		        , #{item.H}
+		        , #{item.I}
+		        , #{item.J}
+		        , #{item.K}
+		        , #{item.L}
+		        , #{item.M}
+		    )
+		  INTO school_register_status 
+		    (
+		        stdnt_no
+		        , sknrg_sttus_grade
+		        , sknrg_sttus_major1
+		        , sknrg_sttus_entsch
+		        , sknrg_sttus_enterence_se
+		    ) VALUES 
+		    (
+		        #{item.A}
+		        , #{item.N}
+		        , #{item.O}
+		        , #{item.P}
+		        , #{item.Q}
+		    )
+		    INTO school_register_history (
+		    semstr_no
+		    , stdnt_no 
+		    , sknrg_hist_date 
+		    , sknrgs_se
+		) VALUES (
+		    #{item.R}
+		    , #{item.A}
+		    , #{item.S}
+		    , #{item.T}
+		)
+		SELECT * FROM dual
+		</foreach>
+	</insert>
+
+</mapper>

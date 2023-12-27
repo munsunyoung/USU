@@ -1,0 +1,130 @@
+package kr.ac.usu.student.service.impl;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import kr.ac.usu.paging.vo.PaginationInfo;
+import kr.ac.usu.student.mapper.StaffRegisterStatusRequestMapper;
+import kr.ac.usu.student.service.StaffRegisterStatusRequestService;
+import kr.ac.usu.student.vo.SchoolRegisterHistoryVO;
+import kr.ac.usu.student.vo.SchoolRegisterVO;
+import lombok.RequiredArgsConstructor;
+
+/**
+ * <pre>
+ * 
+ * </pre>
+ * @author 문선영
+ * @since 2023. 11. 24.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일        수정자       수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 24.      문선영       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */ 
+@Service
+@RequiredArgsConstructor
+public class StaffRegisterStatusRequestServiceImpl implements StaffRegisterStatusRequestService{
+	
+	private final StaffRegisterStatusRequestMapper mapper;
+	
+	// 복수전공 신청 리스트
+	@Override
+	public void retrieveDoubleMajorRequestList(PaginationInfo<SchoolRegisterVO> paging) {
+		int totalRecord = mapper.selectDoubleMajorRequestTotalRecord(paging);
+		paging.setTotalRecord(totalRecord);
+		List<SchoolRegisterVO> dataList = mapper.selectDoubleMajorRequestList(paging);
+		paging.setDataList(dataList);
+	}
+
+	// 부전공 신청 리스트
+	@Override
+	public void retrieveMinorRequestList(PaginationInfo<SchoolRegisterVO> paging) {
+		int totalRecord = mapper.selectMinorRequestTotalRecord(paging);
+		paging.setTotalRecord(totalRecord);
+		List<SchoolRegisterVO> dataList = mapper.selectMinorRequestList(paging);
+		paging.setDataList(dataList);
+	}
+
+	// 전과 신청 리스트
+	@Override
+	public void retrieveMoveMajorRequestList(PaginationInfo<SchoolRegisterVO> paging) {
+		int totalRecord = mapper.selectMoveRequestTotalRecord(paging);
+		paging.setTotalRecord(totalRecord);
+		List<SchoolRegisterVO> dataList = mapper.selectMoveMajorRequestList(paging);
+		paging.setDataList(dataList);
+	}
+
+	// 복수전공 신청 정보
+	@Override
+	public SchoolRegisterVO retrieveDoubleMajorRequestInfo(String sknrgNo) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	// 부전공 신청 정보
+	@Override
+	public SchoolRegisterVO retrieveMinorRequestInfo(String sknrgNo) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	// 전과 신청 정보
+	@Override
+	public SchoolRegisterVO retrieveMoveMajorRequestInfo(String sknrgNo) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	// 복수전공 신청 반려 (학적변동 신청 정보 업데이트)
+	@Override
+	public int modifyRefusedDoubleMajorRequestInfo(SchoolRegisterVO sknrgNo) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	// 부전공 신청 반려 (학적변동 신청 정보 업데이트)
+	@Override
+	public int modifyRefusedMinorRequestInfo(SchoolRegisterVO sknrgNo) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	// 전과 신청 반려 (학적변동 신청 정보 업데이트)
+	@Override
+	public int modifyRefusedMoveMajorRequestInfo(SchoolRegisterVO sknrgNo) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	// 복수전공 신청 승인 (학적변동 신청 정보 업데이트, 학적변동 인서트)
+	@Override
+	public int modifyAppliedDoubleMajorRequestInfo(SchoolRegisterVO sknrgNo, SchoolRegisterHistoryVO history) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	// 부전공 신청 승인 (학적변동 신청 정보 업데이트, 학적변동 인서트)
+	@Override
+	public int modifyAppliedMinorRequestInfo(SchoolRegisterVO sknrgNo, SchoolRegisterHistoryVO history) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	// 전과 신청 승인 (학적변동 신청 정보 업데이트, 학적변동 인서트)
+	@Override
+	public int modifyAppliedMoveMajorRequestInfo(SchoolRegisterVO sknrgNo, SchoolRegisterHistoryVO history) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	
+	
+	
+	
+	
+}

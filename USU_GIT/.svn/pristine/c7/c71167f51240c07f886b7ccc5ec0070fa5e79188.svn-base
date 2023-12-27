@@ -1,0 +1,50 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %> 
+
+<style>
+.sub_tit04{font-size: 18px;color: #304b73;padding-left:0px;font-weight: 600;width: 60%;float:left; text-align:left; margin-bottom:5px;}   
+.sub_tit04 span{    width: 8px;
+    height: 8px;
+    background: #304b73;
+    display: block;
+    float: left;
+    margin-right: 8px;
+    position: relative;
+    top: 9px;}
+#btn1 {
+width : 80px;
+height : 30px;
+float: right;
+margin-top: 10px;
+color : white;
+text-align: center;
+padding-bottom: 30px;
+}
+</style>
+
+<div class="homework_wrap mb-4">
+     <div class="table_style01 mt-4 mb-4 table_center">			   
+  					<div class="sub_tit04"><span></span>시설물 정보</div> 				             						
+  						<table class="table_style02 table_center">
+	    					<colgroup>
+	    						<col width="10%">
+	    						<col width="10%">
+	    					</colgroup>	    			
+	    					<tr>
+	    						<th>소속건물</th><td>${facilities.building.buldNm}</td>
+	    					</tr>
+	    					<tr>
+	    						<th>시설물명</th><td>${facilities.fcltsNm}</td>
+	    					</tr>
+	    					<tr>
+	    						<th>분류</th><td>${facilities.fcltsPurps}</td>
+	    					</tr>
+	    					<tr>
+	    						<th>수용인원</th><td>${facilities.fcltsNmpr}</td>
+	    					</tr>		
+  			   		</table>	
+  			   		<button id="btn1" class="btn btn-primary" value="수정">수정</button>
+  			</div> 				
+  		</div>
+  			

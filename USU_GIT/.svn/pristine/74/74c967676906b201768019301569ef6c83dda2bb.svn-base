@@ -1,0 +1,212 @@
+/**
+ * </pre>
+ * @author 김재성
+ * @since 2023. 11. 23.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ *  수정일         수정자       수정내용
+ * --------     ------    ----------------
+ * 2023.11.23.   김재성       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+
+$(function() {
+	
+	
+	
+	
+	 //단과대학 선택 된 대학 학과 리스트 select 넣기
+     $("#clgSelect").change(function() {
+        let selectCollege = $(this).val();
+		
+        $.ajax({
+            url: '/professor/lecture/subjectList',
+            method: 'GET',
+			dataType: 'json',
+            data: {clgNo:selectCollege},
+            success: function(resp) {
+				
+				console.log(resp);
+				
+                let subjectSelect = $("#subjctSelect");
+				
+				subjectSelect.empty();
+				 
+                $.each(resp, function(idx, subject) {
+                    subjectSelect.append($("<option>").text(subject.subjctNm).val(subject.subjctNo));
+                });
+            },
+            error: function (error) {
+                console.error('에러 발생 !', error);
+            }
+        });
+    });
+	
+	
+	let coursePnt ;
+	//학과 선택된 교과목 불러오기
+    $("#subjctSelect").change(function() {
+        let selectSubject = $(this).val();
+		
+		console.log("subject",selectSubject);
+		
+        $.ajax({
+            url: '/professor/lecture/courseList',
+            method: 'GET',
+			dataType: 'json',
+            data: {subjctNo:selectSubject},
+            success: function(resp) {
+				coursePnt = resp;
+				
+                let courseSelect = $("#courseSelect");
+				
+				courseSelect.empty();
+				 
+                $.each(resp, function(idx, course) {
+                    courseSelect.append($("<option>").text(course.courseNm).val(course.courseNo));
+                });
+				
+            },
+            error: function (error) {
+                console.error('에러 발생 !', error);
+            }
+        });
+    });
+
+	$("#courseSelect").change(function() {
+		console.log("coursePnt",coursePnt);
+		let courseSelect = $(this).val();
+		
+		$.each(coursePnt,function(idx,val){
+			if(coursePnt[idx].courseNo == courseSelect){
+				$("#selectSubjectCourseCoursePnt").val(coursePnt[idx].coursePnt);
+			}
+		});
+		
+    });
+	
+	
+	let timeArr = [];
+	$(document).on("change","[jsSel]",function(){
+		timeArr.push(this.value);
+		console.log("체킁",timeArr);
+	});
+	 
+
+	//건물 선택된 강의실 불러오기
+    $("#buldSelect").change(function() {
+        let buldSelect = $(this).val();
+		
+		console.log("building",buldSelect);
+		
+        $.ajax({
+            url: '/professor/lecture/facilitiesList',
+            method: 'GET',
+			dataType: 'json',
+            data: {buldNo:buldSelect},
+            success: function(resp) {
+				
+				console.log(resp);
+				
+                let fcltsSelect = $("#fcltsSelect");
+				
+				fcltsSelect.empty();
+				 
+                $.each(resp, function(idx, facilities) {
+                    fcltsSelect.append($("<option>").text(facilities.fcltsPurps+"("+facilities.fcltsNm+")").val(facilities.fcltsNo));
+                });
+            },
+            error: function (error) {
+                console.error('에러 발생 !', error);
+            }
+        });
+    });
+	
+	
+	// 강의시간표 추가 버튼 기능
+    function assignRemoveHandler(button) {
+       button.click(function() {
+          $(this).closest('tr').remove();
+
+			$(".tmtbSe").each(function(idx){
+				$(this).attr("name","lectureRequestInfoVOList["+idx+"].tmtbSe");
+			});
+       });
+    }
+
+        assignRemoveHandler($(".remove-button"));
+
+    $(".add-button").click(function() {
+            var newRow = $(".time-table-row").first().clone();
+
+            assignRemoveHandler(newRow.find('.remove-button'));
+
+            $(".time-table-row").last().after(newRow);
+
+			$(".tmtbSe").each(function(idx){
+				$(this).attr("name","lectureRequestInfoVOList["+idx+"].tmtbSe");
+			});
+     });
+
+	 assignRemoveHandler($(".remove-button"));
+	
+	
+	
+	// 강의계획서 모두 작성한 후에 등록 버튼 눌렀을때
+	$("#lectureOpenedRequest").on("submit",function(event){
+		event.preventDefault();
+		
+		let timetable = $(".timeTableRow").val();
+		
+		let data = $(this).serialize();
+		
+		$.ajax({
+		url:'/professor/lecture/',
+		method :"POST",
+		// data: SearchVO,
+		type : "JSON",
+		success : function(rslt){
+
+			console.log("체킁:",rslt);	
+
+			let lectureList = rslt.paging.dataList;
+								
+			let listTags = null;
+			if (lectureList.length > 0 ){
+				$.each(lectureList, function(i,lecture){
+					listTags += 
+						makeTags(lecture);
+				});
+				$(pagingArea).html(resp.paging.pagingHTML);
+				//$(listBody).prepend(listTags);
+			}else{
+				listTags +=`
+					<tr>
+						<td colspan="8" style="text-align: center;">강의중인 내역이 없습니다.</td>
+					</tr>
+				`;
+				$(pagingArea).empty();
+			}
+			$("#listBody").html(listTags);
+			
+		},
+		error : function(xhr){
+			console.log(xhr.status);
+		}
+	});
+		
+		
+	});
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+});

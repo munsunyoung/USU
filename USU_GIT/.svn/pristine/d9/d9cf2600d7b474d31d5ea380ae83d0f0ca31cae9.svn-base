@@ -1,0 +1,50 @@
+/**
+ * <pre>
+ * 학생메뉴 수업 > 강의조회 페이지에서 사용하는 자바스크립트파일
+ * </pre>
+ * @author 김석호
+ * @since 2023. 11. 10.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일       수정자       수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 10.      김석호       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */ 
+$(()=>{
+	$.getJSON("/student/ajax/LectureList")
+	.done(function(res){
+		let list = res.list;
+		let code = "";
+		if(list?.length > 0){
+			$.each(list,function(i,v){
+				code += makeTrTags(v);
+			})
+		}else{
+			code += "<tr><td colspan='6'>수강중인 과목이 없습니다</td></tr>"
+		}
+			$("#listbody").html(code)
+	})
+	
+})
+
+var makeTrTags = (lecture)=>{
+	let times = []
+	let tables = lecture.timetable;
+	for(let i = 0 ; i < tables.length ; i++){
+		times.push(tables[i].tmtbSe)
+	}
+	let tag = `
+		<tr>
+			<td>${lecture.course.courseNm}</td>
+			<td>${lecture.complSe}</td>
+			<td>${lecture.course.coursePnt}</td>
+			<td>${lecture.professor.prfsorNm}</td>
+			<td>${lecture.lctreNmpr}</td>
+			<td>${times}</td>
+		</tr>
+	`;
+	return tag;
+}

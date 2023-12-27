@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.usu.classroom.mapper.ProfessorClassroomTestMapper">
+	
+	<insert id="insertTest" parameterType="kr.ac.usu.classroom.vo.TestVO">
+	
+	</insert>
+	
+	<insert id="insertClassroomTestQuest" parameterType="kr.ac.usu.classroom.vo.TestQuestionVO">
+	
+	</insert>
+	
+	<insert id="insertTestAnswerPaper" parameterType="kr.ac.usu.classroom.vo.TestAnswerVO">
+	
+	</insert>
+</mapper>

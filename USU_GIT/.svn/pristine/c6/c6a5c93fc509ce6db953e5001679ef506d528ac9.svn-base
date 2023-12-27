@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.usu.score.mapper.ProfessorScoreMapper">
+	
+	<!-- 성적관리 교수 강의목록 select Option 용 -->
+	<resultMap type="kr.ac.usu.lecture.vo.LectureVO" id="scoreLectureMap" autoMapping="true">
+		<id property="lctreNo" column="LCTRE_NO"/>
+		<association property="facilities" javaType="kr.ac.usu.facilities.vo.FacilitiesVO" autoMapping="true" >
+			<association property="building" javaType="kr.ac.usu.facilities.vo.BuildingVO" autoMapping="true">
+				<result property="buldNo" column="BULD_NO"/>
+			</association>
+		</association>
+		<association property="course" javaType="kr.ac.usu.course.vo.CourseVO" autoMapping="true" />
+		<collection property="timetable" ofType="kr.ac.usu.lecture.vo.LectureTimetableVO" >
+			<result column="TMTB_SE" property="tmtbSe"/>
+		</collection>
+	</resultMap>
+	<select id="selectScoreProfessorLecture" parameterType="String" resultMap="scoreLectureMap" >
+		SELECT DISTINCT   L.LCTRE_NO
+                        , L.LCTRE_NMPR
+                        , L.PRFSOR_NO
+                        , L.COURSE_NO
+                        , L.SEMSTR_SE
+                        , K.SEMSTR_YR
+                        , K.SEMSTR    
+                        , (SELECT A.COM_CODE_NM FROM COM_CODE A WHERE A.COM_CODE_GRP = 'SEC015' AND A.COM_CODE = L.LCTRE_SE) LCTRE_SE
+                        , (SELECT B.COM_CODE_NM FROM COM_CODE B WHERE B.COM_CODE_GRP = 'SEC014' AND B.COM_CODE = L.COMPL_SE) COMPL_SE
+                        , (SELECT F.FCLTS_NM FROM FACILITIES F WHERE F.FCLTS_NO = L.FCLTS_NO) FCLTS_NM
+                        , (SELECT O.BULD_NM FROM BUILDING O, FACILITIES F WHERE O.BULD_NO = F.BULD_NO AND F.FCLTS_NO = L.FCLTS_NO) BULD_NM
+                        , U.COURSE_NM
+                        , U.COURSE_PNT
+                        , (SELECT N.COM_CODE_NM FROM COM_CODE N WHERE N.COM_CODE_GRP = 'SEC011' AND N.COM_CODE = V.TMTB_SE ) TMTB_SE
+ 
+		FROM   LECTURE L INNER JOIN SEMESTER K ON (K.SEMSTR_NO = L.SEMSTR_SE)
+                         INNER JOIN COURSE U ON (L.COURSE_NO = U.COURSE_NO)
+                         INNER JOIN LECTURE_TIMETABLE V ON (L.LCTRE_NO = V.LCTRE_NO)
+                  
+       WHERE L.PRFSOR_NO= #{prfsorNo,jdbcType=VARCHAR}
+         AND K.SEMSTR_YR = TO_CHAR(SYSDATE, 'YYYY')
+      
+      ORDER BY TMTB_SE ASC
+	</select>
+	
+	<!-- 성적 이의신청 목록 -->
+	<resultMap type="kr.ac.usu.score.vo.ScoreObjectionVO" id="scoreObjectionMap" autoMapping="true">
+		<association property="lecture" javaType="kr.ac.usu.lecture.vo.LectureVO" autoMapping="true">
+			<collection property="lectureEvaluationStandard" javaType="kr.ac.usu.lecture.vo.LectureEvaluationStandardVO" autoMapping="true"/>
+		</association>
+		<association property="student" javaType="kr.ac.usu.user.vo.StudentVO" autoMapping="true"/>
+	</resultMap>
+	<select id="selectScoreObjectionList" parameterType="String" resultMap="scoreObjectionMap">
+		SELECT DISTINCT   O.STDNT_NO
+		                , O.LCTRE_NO
+		                , O.SCORE_OBJC_CN
+		                , (SELECT D.COM_CODE_NM FROM COM_CODE D WHERE D.com_code_grp = 'SEC013' AND D.COM_CODE = O.CONFM_SE) CONFM_SE
+		                , O.SCORE_OBJC_RETURN
+		                , L.PRFSOR_NO
+		                , (SELECT A.COM_CODE_NM FROM COM_CODE A WHERE A.COM_CODE_GRP = 'SEC015' AND A.COM_CODE = L.LCTRE_SE) LCTRE_SE
+		                , (SELECT SEMSTR_YR FROM SEMESTER WHERE SEMSTR_NO = L.SEMSTR_SE) SEMSTR_YR
+		                , (SELECT SEMSTR FROM SEMESTER WHERE SEMSTR_NO = L.SEMSTR_SE) SEMSTR
+		                , V.SCORE_SE
+		                , V.LCTRE_EVL_STDR_REFLCT
+		                , E.SCORE_SE
+		                , E.SCORE_SCORE
+		                , I.STDNT_NM
+		                , I.STDNT_TELNO
+		                , R.SKNRG_STTUS_GRADE
+		                , R.SKNRG_STTUS_MAJOR1
+		                , C.SUBJCT_NM
+
+                
+		FROM SCORE_OBJECTION O INNER JOIN LECTURE L ON (L.LCTRE_NO = O.LCTRE_NO)
+		                       INNER JOIN LECTURE_EVALUATION_STANDARD V ON (SUBSTR(V.LCTRE_ACNUTNO_NO,2) = O.LCTRE_NO)
+		                       INNER JOIN SCORE E ON (E.STDNT_NO = O.STDNT_NO AND E.LCTRE_NO = O.LCTRE_NO)
+		                       INNER JOIN STUDENT S ON (S.STDNT_NO = O.STDNT_NO)
+		                       INNER JOIN STUDENT_INFORMATION I ON (I.STDNT_NO = O.STDNT_NO)
+		                       INNER JOIN SCHOOL_REGISTER_STATUS R ON (R.STDNT_NO = I.STDNT_NO)
+		                       INNER JOIN SUBJECT C ON (C.SUBJCT_NO = R.SKNRG_STTUS_MAJOR1)
+		WHERE  O.LCTRE_NO = #{lctreNo,jdbcType=VARCHAR}
+	</select>
+</mapper>

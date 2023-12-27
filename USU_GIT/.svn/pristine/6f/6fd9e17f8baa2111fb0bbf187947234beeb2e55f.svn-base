@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.usu.mainPage.mapper.StudentMainPageMapper">
+
+	<select id="selectCommonBoardList" parameterType="kr.ac.usu.board.vo.BoardVO">
+		SELECT ROWNUM RNUM, A.*
+		FROM (
+			SELECT
+			    bo_no
+			    , bo_date
+			    , bo_title
+			    , bo_cnt
+			FROM
+			    board
+			WHERE
+			    bd_se = '02'
+			ORDER BY bo_cnt DESC
+		) A
+		<![CDATA[
+	    WHERE ROWNUM >= 1 AND ROWNUM <= 4
+	    ]]>
+	</select>
+	
+	<select id="selectNoticeBoardList" parameterType="kr.ac.usu.board.vo.BoardVO">
+		SELECT ROWNUM RNUM, A.*
+		FROM (
+			SELECT
+			    bo_no
+			    , bo_date
+			    , bo_title
+			    , bo_cnt
+			FROM
+			    board
+			WHERE
+			    bd_se = '01'
+			ORDER BY bo_cnt DESC
+		) A
+		<![CDATA[
+	    WHERE ROWNUM >= 1 AND ROWNUM <= 4
+	    ]]>
+	</select>
+	
+
+</mapper>

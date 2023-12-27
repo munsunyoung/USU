@@ -1,0 +1,44 @@
+package kr.ac.usu.professor.service.impl;
+
+import org.springframework.stereotype.Service;
+
+import kr.ac.usu.professor.mapper.ProfessorMypageMapper;
+import kr.ac.usu.user.vo.ProfessorVO;
+import lombok.RequiredArgsConstructor;
+
+/**
+ * <pre>
+ * 
+ * </pre>
+ * @author 문선영
+ * @since 2023. 11. 29.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일        수정자       수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 29.      문선영       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */ 
+@Service
+@RequiredArgsConstructor
+public class ProfessorMypageServiceImpl implements ProfessorMypageService{
+	
+	private final ProfessorMypageMapper mapper;
+
+	// 교수 인적 정보
+	@Override
+	public ProfessorVO retrieveProfessorInfo(String prfsorNo) {
+		ProfessorVO professorInfo = mapper.selectProfessorInfo(prfsorNo);
+		return professorInfo;
+	}
+
+	// 내정보 수정
+	@Override
+	public int modifyMypage(ProfessorVO prfsorNo) {
+		int res = mapper.updateMypage(prfsorNo);
+		return res;
+	}
+
+}

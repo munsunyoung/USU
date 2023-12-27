@@ -1,0 +1,72 @@
+/**
+ * <pre>
+ * 학생 금학기성적 조회 페이지에서 사용하는 자바스크립트
+ * studentCurrScore.jsp 에서 사용
+ * </pre>
+ * @author 김석호
+ * @since 2023. 11. 22.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일            수정자       수정내용
+ * --------          --------    ----------------------
+ * 2023. 11. 22.      김석호       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */ 
+
+document.addEventListener("DOMContentLoaded", function(){
+
+	
+});
+
+function checkForLectureEvaulation(){
+	
+}
+
+function getCurrenSemesterScoreList(){
+	var currenSemesterCodeForScoreAjax = $('#currenSemesterPrintArea').data('currSemCd');
+	console.log(currenSemesterCodeForScoreAjax);
+	var currentSemesterScoreInitAjaxSettings = {
+		url : `/student/ajax/scoreList/${currenSemesterCodeForScoreAjax}`
+		, method : "get"
+		, dataType : "json"
+		, success : function(res){
+			console.log("success function 첫줄")
+			console.log(res);
+			let code = "";
+			if(res.dataList?.length > 0){
+				$.each(res.dataList,function(i,v){
+					code += makeCurrentSemesterScoreTrTags(v);
+				})
+			}else{
+				code += `
+					<tr>
+						<td colspan="6">금학기 성적 정보없음</td>
+					</tr>
+				`;
+			}
+			console.log(res.calScore);
+			$('#calScoreArea').text(res.calScore);
+			$('#scoreListBody').html(code);
+		}
+		, error : function(xhr, status, err){
+			console.log(err);
+		}
+	};	
+}
+
+function makeCurrentSemesterScoreTrTags(score){
+	var currentSemesterScoreTrTagCode = `
+		<tr data-lctre-no="${score.lctreNo}">
+			<td>${score.lctreNo}</td>
+			<td>${score.lecture.course.coursePnt}</td>
+			<td>${score.lecture.course.courseNm}</td>
+			<td>${score.printScore}</td>
+			<td>${score.lecture.complSe}</td>
+			<td><button class="blue_btn small_btn scoreObjectionBtn">이의제기</button></td>
+		</tr>
+	`;
+	
+	return currentSemesterScoreTrTagCode;
+}

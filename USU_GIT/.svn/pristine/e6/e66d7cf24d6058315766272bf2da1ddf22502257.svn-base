@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="kr.ac.usu.lecture.mapper.StaffLectureRequestMapper">
+	
+	<resultMap type="kr.ac.usu.lecture.vo.LectureRequestVO" id="lectureRequestMap" autoMapping="true">
+		<id property="lctreReqstNo" column="LCTRE_REQST_NO"/>
+		<association property="professor" javaType="kr.ac.usu.user.vo.ProfessorVO" autoMapping="true"/> 
+		<association property="facilitiess" javaType="kr.ac.usu.facilities.vo.FacilitiesVO" autoMapping="true" />
+		<association property="course" javaType="kr.ac.usu.course.vo.CourseVO" autoMapping="true" />
+		<association property="building" javaType="kr.ac.usu.facilities.vo.BuildingVO" autoMapping="true" />
+		
+	</resultMap>
+	
+	<sql id="searchFrag"> 
+		<where>
+	    	<if test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	    		<choose>
+	    			<when test="simpleCondition.searchType eq 'prfsorNm'">
+	    				INSTR(PRFSOR_NM, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<when test="simpleCondition.searchType eq 'courseNm'">
+	    				INSTR(COURSE_NM, #{simpleCondition.searchWord}) > 0
+	    			</when>	    		
+	    			<otherwise>
+	    				INSTR(PRFSOR_NM, #{simpleCondition.searchWord}) > 0
+	    				OR
+	    				INSTR(COURSE_NM, #{simpleCondition.searchWord}) > 0	 
+	    			</otherwise>
+	    		</choose>
+	    	</if>
+	    </where>
+	</sql>
+	
+	<sql id="fromFrag">
+	   SELECT  A.LCTRE_REQST_NO
+	    
+      , A.LCTRE_REQST_DATE
+      , A.LCTRE_REQST_RETURN
+      , (SELECT D.COM_CODE_NM FROM COM_CODE D WHERE D.com_code_grp = 'SEC013' AND D.COM_CODE = A.CONFM_SE) CONFM_SE_NM 
+      , A.LCTRE_SE
+      , (SELECT D.COM_CODE_NM FROM COM_CODE D WHERE D.com_code_grp = 'SEC015' AND D.COM_CODE = A.LCTRE_SE) LCTRE_SE_NM              
+      , (SELECT D.COM_CODE_NM FROM COM_CODE D WHERE D.com_code_grp = 'SEC014' AND D.COM_CODE = A.COMPL_SE) COMPL_SE_NM              
+      , (SELECT D.COM_CODE_NM FROM COM_CODE D WHERE D.com_code_grp = 'SEC018' AND D.COM_CODE =  A.SEMSTR_SE) SEMSTR_SE_NM              
+      , B.PRFSOR_NO
+      , B.PRFSOR_NM
+      , C.COURSE_NO
+      , C.COURSE_NM
+      , G.FCLTS_NO
+      , G.FCLTS_NM
+      , H.BULD_NO
+      , H.BULD_NM
+		FROM 
+				LECTURE_REQUEST A INNER JOIN PROFESSOR B ON(A.PRFSOR_NO = B.PRFSOR_NO)
+
+                       INNER JOIN COURSE C ON (A.COURSE_NO = C.COURSE_NO)
+                       INNER JOIN FACILITIES G ON (A.FCLTS_NO = G.FCLTS_NO)
+                       INNER JOIN BUILDING H ON (A.BULD_NO = H.BULD_NO)
+	</sql>
+	
+	<!-- 상담 신청 목록 불러오기 -->
+	<select id="selectTotalRecord" resultType="int" parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM
+		(<include refid="fromFrag" />)
+			
+		<include refid="searchFrag" />
+	</select>
+	
+	<select id="selectLectureRequestList" parameterType="kr.ac.usu.paging.vo.PaginationInfo" resultMap="lectureRequestMap">
+		SELECT A.*
+		FROM (
+			SELECT ROWNUM RNUM, B.*
+			FROM(
+				<include refid="fromFrag" />
+				) B
+			<include refid="searchFrag" />
+		) A
+		<![CDATA[
+	    WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+	    ]]>
+	</select>
+	
+	<!-- 상담 신청 내역 상세페이지 불러오기 -->
+	<select id="selectLectureRequestInfo" resultMap="lectureRequestMap" parameterType="string">
+		SELECT A.*
+		FROM (
+		     SELECT  A.LCTRE_REQST_NO
+	    
+      , A.LCTRE_REQST_DATE
+      , A.LCTRE_REQST_RETURN
+      , (SELECT D.COM_CODE_NM FROM COM_CODE D WHERE D.com_code_grp = 'SEC013' AND D.COM_CODE = A.CONFM_SE) CONFM_SE_NM 
+      , A.LCTRE_SE
+      , (SELECT D.COM_CODE_NM FROM COM_CODE D WHERE D.com_code_grp = 'SEC015' AND D.COM_CODE = A.LCTRE_SE) LCTRE_SE_NM              
+      , (SELECT D.COM_CODE_NM FROM COM_CODE D WHERE D.com_code_grp = 'SEC014' AND D.COM_CODE = A.COMPL_SE) COMPL_SE_NM              
+      , SUBSTR(SEMSTR_SE,1,4)||'년도 '||SUBSTR(SEMSTR_SE,5,1)||'학기' SEMSTR_SE_NM 
+      , SEMSTR_SE            
+      , B.PRFSOR_NO
+      , B.PRFSOR_NM
+      , C.COURSE_NO
+      , C.COURSE_NM
+      , G.FCLTS_NO
+      , G.FCLTS_NM
+      , H.BULD_NO
+      , H.BULD_NM
+		
+		FROM 
+		LECTURE_REQUEST A INNER JOIN PROFESSOR B ON(A.PRFSOR_NO = B.PRFSOR_NO)
+		INNER JOIN COURSE C ON (A.COURSE_NO = C.COURSE_NO)
+        INNER JOIN FACILITIES G ON (A.FCLTS_NO = G.FCLTS_NO)
+        INNER JOIN BUILDING H ON (A.BULD_NO = H.BULD_NO)
+        
+        WHERE
+        	A.LCTRE_REQST_NO = #{lctreReqstNo}
+		) A
+	</select>
+	
+	<!-- 		
+	LectureRequestVO(rnum=0, lctreReqstNo=RF05824101, lctreReqstDate=null, prfsorNo=00000106, courseNo=null, complSe=,, 
+	complSeNm=null, semstrSe=20231, semstrSeNm=null, confmSe=null, confmSeNm=null, lctreReqstReturn=null, lctreSe=null, 
+	lctreSeNm=null, fcltsNo=, buldNo=null, professor=null, course=null, facilitiess=null, lctreAcnutnoNo=null, 
+	lectureRequestInfoVOList=null, lectureActionPlanVO=null, facilities=null, building=null)
+	 -->
+	<update id="updateAppliedLectureRequest" parameterType="kr.ac.usu.lecture.vo.LectureRequestVO">
+		UPDATE lecture_request
+		SET
+		    confm_se = '02'
+		WHERE
+		     lctre_reqst_no = #{lctreReqstNo}
+	</update>
+	
+	<!-- lctreSe*(강의형태), fcltsNo, complSe, couresNo
+	LectureVO(rnum=0, buldNm=null, fcltsNm=null, semstrSeNm=null, lctreNo=null, lctreNmpr=30, lctreSe=01, fcltsNo=, 
+	prfsorNo=00000106, semstrSe=20231, complSe=,, courseNo=null, professor=null, facilities=null, course=null, 
+	timetable=null, tmtbSeNm=null, student=null, currCnt=null, coursePnt=null, courseDayOfWeek=null, 
+	courseNm=null, prfsorNm=null, currentPage=null, lctreReqstNo=RF05824102, evaStatus=null)
+	 -->
+	<insert id="insertLecture" parameterType="kr.ac.usu.lecture.vo.LectureVO">
+		INSERT INTO lecture (
+		     lctre_no
+		   , lctre_nmpr
+		   , lctre_se
+		   , fclts_no
+		   , prfsor_no
+		   , semstr_se
+		   , compl_se
+		   , COURSE_NO
+		) VALUES (
+		<![CDATA[SUBSTR(#{lctreReqstNo}, 2)]]>
+        , '30'
+        , #{lctreSe, jdbcType = VARCHAR}
+        , #{fcltsNo, jdbcType = VARCHAR}
+        , #{prfsorNo, jdbcType = VARCHAR}
+        , #{semstrSe, jdbcType = VARCHAR}
+        , #{complSe, jdbcType = VARCHAR}
+        , #{courseNo, jdbcType = VARCHAR}
+		)
+	</insert>
+	
+	<update id="updateRefusedLectureRequest" parameterType="kr.ac.usu.lecture.vo.LectureRequestVO">
+		UPDATE lecture_request
+		SET
+		    confm_se = '03'
+		    , lctre_reqst_return = #{lctreReqstReturn}
+		WHERE
+		    lctre_reqst_no = #{lctreReqstNo}
+	</update>
+</mapper>

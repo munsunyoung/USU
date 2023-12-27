@@ -1,0 +1,50 @@
+package kr.ac.usu.mainPage.service.impl;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.ac.usu.board.vo.BoardVO;
+import kr.ac.usu.mainPage.mapper.StudentMainPageMapper;
+import kr.ac.usu.mainPage.service.StudentMainPageService;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * <pre>
+ * 
+ * </pre>
+ * @author 문선영
+ * @since 2023. 11. 27.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일        수정자       수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 27.      문선영       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */ 
+@Slf4j
+@Service
+public class StudentMainPageServiceImpl implements StudentMainPageService{
+	
+	@Inject
+	private StudentMainPageMapper mapper;
+	
+	// 일반공지 리스트
+	@Override
+	public List<BoardVO> retrieveCommonBoardList() {
+		List<BoardVO> comBoardList = mapper.selectCommonBoardList();
+		return comBoardList;
+	}
+
+	// 학사공지 리스트
+	@Override
+	public List<BoardVO> retrieveNoticeBoardList() {
+		List<BoardVO> noticeBoardList = mapper.selectNoticeBoardList();
+		return noticeBoardList;
+	}
+
+}

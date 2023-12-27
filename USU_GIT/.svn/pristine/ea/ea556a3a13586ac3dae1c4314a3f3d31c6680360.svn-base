@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.usu.club.mapper.StudentClubMapper">
+
+    <!-- resultMap 정의: ClubVO 클래스의 객체를 결과로 받기 위한 매핑 -->
+    <resultMap type="kr.ac.usu.club.vo.ClubVO" id="clubMap" autoMapping="true">
+        <!-- id 프로퍼티와 CLUB_NO 컬럼 간의 매핑 -->
+        <id property="clubNo" column="CLUB_NO" />
+        <!-- association 프로퍼티와 자동 매핑 -->
+        <association property="student" autoMapping="true" />
+        <!-- Add other mappings as needed -->
+    </resultMap>
+
+    <!-- 동적 검색 조건을 생성하기 위한 SQL 코드 조각 -->
+    <sql id="searchFrag"> 
+        <where>
+            <!-- 검색어가 존재하는 경우 -->
+            <if test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+                <choose>
+                    <!-- 동아리명 검색 -->
+                    <when test="simpleCondition.searchType eq 'clubNm'">
+                        INSTR(CLUB_NM, #{simpleCondition.searchWord}) > 0
+                    </when>
+                    <!-- 동아리 구분 검색 -->
+                    <when test="simpleCondition.searchType eq 'clubSe'">
+                        INSTR(CLUB_SE, #{simpleCondition.searchWord}) > 0
+                    </when>
+                    <!-- 기타 경우 -->
+                    <otherwise>
+                        INSTR(CLUB_NM, #{simpleCondition.searchWord}) > 0
+                        OR
+                        INSTR(CLUB_SE, #{simpleCondition.searchWord}) > 0
+                    </otherwise>
+                </choose>
+            </if>
+        </where>
+    </sql>
+
+    <!-- 전체 레코드 수를 조회하는 SQL 구문 -->
+    <select id="selectTotalRecord" resultType="int" parameterType="Map">
+        SELECT COUNT(*)
+        FROM CLUB            
+        <!-- 검색 조건을 적용하기 위해 searchFrag SQL 코드 조각을 포함 -->
+        <include refid="searchFrag" />
+    </select>
+
+    <!-- 동아리 목록을 조회하는 SQL 구문 -->
+    <select id="selectClubList"  parameterType="Map" resultMap="clubMap">
+        SELECT A.*
+        FROM (
+            SELECT
+                ROWNUM RNUM,
+                C.*
+            FROM CLUB C
+            <include refid="searchFrag" />
+        ) A
+        <![CDATA[
+        WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+        ]]>
+    </select>
+
+</mapper>

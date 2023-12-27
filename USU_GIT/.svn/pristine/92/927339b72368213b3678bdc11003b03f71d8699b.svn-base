@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.usu.scholarship.mapper.StaffScholarshipMapper">
+
+	<resultMap type="kr.ac.usu.scholarship.vo.ScholarshipVO" id="scMap" autoMapping="true">
+		<id property="schlshipNo" column="SCHOLARSHIP_NO"/>
+		<association property="semester" autoMapping="true" />
+		<association property="scholarshipList" autoMapping="true" />
+	</resultMap>
+	
+	 <sql id="searchFrag"> 
+		<where>
+	    	<if test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	    		<choose>
+	    			<when test="simpleCondition.searchType eq 'schoNm'">
+	    				INSTR(SCHO_NM, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<otherwise>
+	    				INSTR(SCHO_NM, #{simpleCondition.searchWord}) > 0
+	    			</otherwise>
+	    		</choose>
+	    	</if>
+	    </where>
+	</sql>
+	
+	<sql id="fromFrag">
+		SELECT					
+            DISTINCT A.SCHO_NM
+            , C.COM_CODE_NM PYMNT_SE
+        FROM
+            SCHOLARSHIP_LIST A INNER JOIN SCHOLARSHIP B ON(A.SCHO_SE = B.SCHO_SE)
+            INNER JOIN COM_CODE C ON (B.PYMNT_SE = C.COM_CODE)
+        WHERE
+            C.COM_CODE_GRP = 'SEC025'
+	</sql>
+	
+	<select id="selectTotalRecord" resultType="int" parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM
+		(<include refid="fromFrag" />)
+			
+		<include refid="searchFrag" />
+	</select>
+	
+	<select id="selectScholarshipList" parameterType="kr.ac.usu.paging.vo.PaginationInfo" resultMap="scMap">
+		SELECT A.*
+		FROM (
+		    SELECT ROWNUM RNUM, B.*
+		    FROM(
+		        <include refid="fromFrag"></include>
+		        ) B
+		    <include refid="searchFrag"></include>
+		) A
+		<![CDATA[
+	    WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+	    ]]>
+	</select>
+</mapper>

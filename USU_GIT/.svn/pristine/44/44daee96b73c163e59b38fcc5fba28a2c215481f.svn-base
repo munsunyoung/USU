@@ -1,0 +1,16 @@
+package kr.ac.usu.classroom.service;
+
+import java.util.List;
+
+import kr.ac.usu.classroom.vo.ClassroomBoardVO;
+import kr.ac.usu.classroom.vo.TestQuestionVO;
+import kr.ac.usu.classroom.vo.TestVO;
+import kr.ac.usu.lecture.vo.LectureVO;
+
+public interface StudentClassroomService {
+	
+	public List<LectureVO> retrieveClassRoomList(String id, String semCd);
+	public List<ClassroomBoardVO> retrieveHomeWorkList(String id, String semCd, String lctreNo);
+	public List<TestQuestionVO> retrieveTestQuestionList(String id, String semCd, String lctreNo);
+	public TestQuestionVO retrieveTestQuestion(TestVO test);
+}

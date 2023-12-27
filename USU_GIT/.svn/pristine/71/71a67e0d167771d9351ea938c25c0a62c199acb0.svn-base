@@ -1,0 +1,34 @@
+package kr.ac.usu.student.mapper;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.ac.usu.paging.vo.PaginationInfo;
+import kr.ac.usu.student.vo.AbsenceSchoolVO;
+
+/**
+ * <pre>
+ * 
+ * </pre>
+ * @author 문선영
+ * @since 2023. 11. 23.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일        수정자       수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 23.      문선영       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */ 
+@Mapper
+public interface StaffAbsenceRequestMapper {
+	
+	// 페이징
+	public int selectTotalRecord(PaginationInfo<AbsenceSchoolVO> paging);
+	
+	// 휴학 신청 리스트
+	public List<AbsenceSchoolVO> selectAbsenceRequestList(PaginationInfo<AbsenceSchoolVO> paging);
+
+}

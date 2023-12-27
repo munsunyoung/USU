@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.usu.mybatis.mapper.user.IdFindMapper">
+    <select id="findProfessorByIdentity" parameterType="map" resultType="kr.ac.usu.user.vo.ProfessorVO">
+        SELECT * FROM PROFESSOR WHERE PRFSOR_NM = #{prfsorNm} AND PRFSOR_IHIDNUM1 = #{prfsorIhidnum1} AND PRFSOR_IHIDNUM2 = #{prfsorIhidnum2}
+    </select>
+
+    <select id="findStaffByIdentity" parameterType="map" resultType="kr.ac.usu.user.vo.StaffVO">
+        SELECT * FROM STAFF WHERE SKLSTF_NM = #{sklstfNm} AND SKLSTF_IHIDNUM1 = #{sklstfIhidnum1} AND SKLSTF_IHIDNUM2 = #{sklstfIhidnum2}
+    </select>
+
+    <select id="findStudentByIdentity" parameterType="map" resultType="kr.ac.usu.user.vo.StudentVO">
+        SELECT * FROM STUDENT_INFORMATION WHERE STDNT_NM = #{stdntNm} AND STDNT_IHIDNUM1 = #{stdntIhidnum1} AND STDNT_IHIDNUM2 = #{stdntIhidnum2}
+    </select>
+</mapper>

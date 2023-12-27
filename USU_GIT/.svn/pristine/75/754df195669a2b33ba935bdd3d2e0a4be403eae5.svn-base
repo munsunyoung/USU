@@ -1,0 +1,90 @@
+/**
+ * 
+ */
+/**
+
+ * </pre>
+ * @author 김재성
+ * @since 2023. 11. 10.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ *  수정일         수정자       수정내용
+ * --------     ------    ----------------
+ * 2023.11.10.   김재성       최초작성
+ * 2023.11.13.   김재성       강의내역 출력
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */  
+ $(function(){
+    
+    function makeTags(lecture){
+    	
+    	let tdTags = `
+			<tr>
+	            <td>${lecture.lctreNmpr}</td>
+	            <td>${lecture.lctreSe}</td>
+	            <td>${lecture.fcltsNo}</td>
+	            <td>${lecture.buldNm}</td>
+	   		</tr>
+			`;
+		return tdTags;    
+    };
+    
+    /*리스트 불러오기*/
+    $("#searchCondition").on("submit", function(event){
+    	event.preventDefault();
+
+		console.log("체킁2",this);
+    	let data = $(this).serializeJSON();
+	    let json = JSON.stringify(data);
+
+
+		console.log("체킁:",json);
+
+	
+    	$.ajax({
+    		url:'/ajax/lectureList',
+    		method :"GET",
+    		data: data,
+    		type : "JSON",
+    		success : function(rslt){
+	
+				console.log("체킁:",rslt);	
+
+				//let lectureList = rslt.lectureList;
+				   			
+    			let listTags = null;
+    			if (rslt.length > 0 ){
+    				$.each(rslt, function(i,lecture){
+    					listTags += 
+							makeTags(lecture);
+    				});
+    				$(listBody).prepend(listTags);
+    			}else{
+    				listTags +=`
+    					<tr>
+    						<td colspan="6" style="text-align: center;">강의중인 내역이 없습니다.</td>
+    					</tr>
+    				`;
+    			}
+    			$("#listBody").html(listTags);
+    			
+			},
+    		error : function(xhr){
+				console.log(xhr.error);
+			}
+    	})
+    });
+    
+    /* 검색 조건 */
+	$("#searchUI").on("click", "#searchBtn", function(event) {
+		let inputs = $(this).parents("#searchUI").find(":input[name]");
+		$.each(inputs, function(idx, ipt) {
+			let name = ipt.name;
+			let value = $(ipt).val();
+			$(searchCondition).find(`:input[name=${name}]`).val(value);
+		});
+		$(searchCondition).submit();
+	});
+});

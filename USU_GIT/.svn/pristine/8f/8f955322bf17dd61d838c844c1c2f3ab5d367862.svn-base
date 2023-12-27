@@ -1,0 +1,38 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+ <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+<style>
+.fc-h-event{border:none !important;}
+.fc-daygrid-event{border-radius:0 !important;}
+</style>    
+			<div class="main_top_content_wrap col-xl-12">
+					<div class="welcom_txt"><span>엄석대님 </span> 안녕하세요.</div>
+					<div class="s_txt">공지사항을 확인하세요.</div>
+					<button class="set_btn">확인하기	<i class="fa fa-angle-right"></i></button> 		
+				</div>
+			
+
+				<!-- Begin Page Content -->
+				<div class="container-fluid">
+						
+						
+						<div class="col-lg-6 mb-4">
+
+                            <!-- Illustrations -->
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">학사일정</h6>
+                                </div>
+                                <div class="card-body">
+								<!-- 실제 화면을 담을 영역 -->
+								<div id="Wrapper">
+									<div id='calendar'></div>
+								</div>
+						</div>		
+				</div>
+				<!-- /.container-fluid -->
+				
+				
+<script src="${pageContext.request.contextPath }/resources/js/app/kwh/staffMain.js"></script>
+
+				

@@ -1,0 +1,5 @@
+package kr.ac.usu.consultation.controller;
+
+public class StaffConsultationController {
+
+}

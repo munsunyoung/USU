@@ -1,0 +1,22 @@
+/**
+ * <pre>
+ * 로그인페이지에 필요한 스크립트
+ * </pre>
+ * @author 김석호
+ * @since 2023. 11. 9.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일       수정자       수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 9.      김석호       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */ 
+
+$(loginBtn).on('click', function(){
+    let tForm = $(this).parent('form');
+	console.log(tForm);
+	tForm.submit();
+});
+

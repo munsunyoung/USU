@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.usu.consultation.mapper.StaffConsultationMapper">
+
+	<resultMap type="kr.ac.usu.consultation.vo.ConsultationVO" id="cnsltMap" autoMapping="true">
+		<id property="cnsltNo" column="CNSLT_NO"/>
+		<association property="student" javaType="kr.ac.usu.user.vo.StudentVO" autoMapping="true" />
+		<association property="staff" javaType="kr.ac.usu.user.vo.StaffVO" autoMapping="true" />
+		<association property="request" javaType="kr.ac.usu.consultation.vo.ConsultationRequestVO" autoMapping="true" />
+	</resultMap>
+
+	<sql id="searchFrag">
+		<where>
+	    	<if test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	    		<choose>
+	    			<when test="simpleCondition.searchType eq 'stdntNm'">
+	    				INSTR(STDNT_NM, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<when test="simpleCondition.searchType eq 'stdntNo'">
+	    				INSTR(STDNT_NO, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<otherwise>
+	    				INSTR(STDNT_NM, #{simpleCondition.searchWord}) > 0
+	    				OR
+	    				INSTR(STDNT_NO, #{simpleCondition.searchWord}) > 0
+	    			</otherwise>
+	    		</choose>
+	    	</if>
+	    </where>
+	</sql>
+	
+	<sql id="listFromFrag">
+		SELECT
+		    A.CNSLT_NO
+		    , B.SKLSTF_NM
+		    , C.STDNT_NM
+		    , A.STDNT_NO
+		    , TO_CHAR(TO_DATE(A.CNSLT_DATE)) CNSLT_DATE
+		    , D.COM_CODE_NM TMTB_SE
+		FROM
+		    CONSULTATION A INNER JOIN STAFF B ON (A.CNSLT_CNSLTNT = B.SKLSTF_NO)
+		    INNER JOIN STUDENT_INFORMATION C ON (A.STDNT_NO = C.STDNT_NO)
+		    LEFT OUTER JOIN COM_CODE D ON (A.TMTB_SE = D.COM_CODE)
+		    
+		WHERE
+		    D.COM_CODE_GRP = 'SEC011'
+		ORDER BY CNSLT_DATE DESC
+	</sql>
+	
+	<!-- 상담 목록 불러오기 -->
+	<select id="selectTotalRecord" resultType="int" parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM
+			(<include refid="listFromFrag" />)
+		<include refid="searchFrag" />
+	</select>
+	
+	<select id="selectConsultationList" resultMap="cnsltMap" parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+		SELECT A.*
+		FROM (
+			SELECT ROWNUM RNUM, B.*
+			FROM(
+				<include refid="listFromFrag" />
+			) B
+			<include refid="searchFrag" />
+		) A
+		<![CDATA[
+	    WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+	    ]]>
+	</select>
+	
+	<!-- 상담 내역 상세페이지 불러오기 -->
+	<select id="selectConsultationInfo" resultMap="cnsltMap" parameterType="string">
+		SELECT A.*
+		FROM (
+		    SELECT
+		        A.CNSLT_NO
+		        , B.SKLSTF_NM CNSLT_CNSLTNT
+		        , C.STDNT_NM
+		        , A.STDNT_NO
+		        , TO_CHAR(TO_DATE(A.CNSLT_DATE)) CNSLT_DATE
+		        , D.CNSLT_REQUST_CN
+		        , E.COM_CODE_NM TMTB_SE
+		        , A.CNSLT_DTLS
+		    FROM
+		        CONSULTATION A INNER JOIN STAFF B ON (A.CNSLT_CNSLTNT = B.SKLSTF_NO)
+		        INNER JOIN STUDENT_INFORMATION C ON (A.STDNT_NO = C.STDNT_NO)
+		        INNER JOIN CONSULTATION_REQUEST D ON (A.CNSLT_NO = D.CNSLT_NO)
+		        LEFT OUTER JOIN COM_CODE E ON (A.TMTB_SE = E.COM_CODE)
+		        
+		    WHERE
+		        E.COM_CODE_GRP = 'SEC011'
+		        AND A.CNSLT_NO = #{cnsltNo}
+		) A
+	</select>
+	
+	<update id="updateConsultationInfo" parameterType="kr.ac.usu.consultation.vo.ConsultationVO">
+		UPDATE
+			consultation
+		SET
+		    cnslt_dtls = #{cnsltDtls}
+		WHERE
+		    cnslt_no = #{cnsltNo}
+	</update>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

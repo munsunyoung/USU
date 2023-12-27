@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.usu.staff.mapper.StaffStaffMapper">
+
+<resultMap type="kr.ac.usu.user.vo.StaffVO" id="staffMap" autoMapping="true">
+	<id property="sklstfNo" column="SKLSTF_NO" />
+</resultMap>
+
+<sql id="searchPro">
+	<where>
+		<if
+			test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+			<choose>
+				<when test="simpleCondition.searchType eq 'SKLSTF_NM'">
+					INSTR(SKLSTF_NM, #{simpleCondition.searchWord}) > 0
+				</when>
+				<when test="simpleCondition.searchType eq 'SKLSTF_TELNO'">
+					INSTR(SKLSTF_TELNO, #{simpleCondition.searchWord}) > 0
+				</when>
+				<otherwise>
+					INSTR(SKLSTF_NM, #{simpleCondition.searchWord}) > 0
+					OR
+					INSTR(SKLSTF_TELNO, #{simpleCondition.searchWord}) > 0
+				</otherwise>
+			</choose>
+		</if>
+	</where>
+</sql>
+
+<select id="selectTotalRecord" resultType="int"
+	parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+	SELECT COUNT(*)
+	FROM STAFF
+	<include refid="searchPro" />
+</select>
+
+<select id="selectStaffList"
+	parameterType="kr.ac.usu.paging.vo.PaginationInfo"
+	resultMap="staffMap">
+	WITH NATIONVIEW AS (
+	SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC002'
+	), GENVIEW AS (
+	SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC001'
+	), GOYONG AS (
+	SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC003'
+
+	)
+	SELECT
+	A.*
+	
+	FROM (
+	
+	SELECT
+	
+	ROWNUM RNUM,
+	SKLSTF_NO,
+	SKLSTF_NM,
+	SKLSTF_PASSWORD,
+	SKLSTF_IHIDNUM1,
+	SKLSTF_IHIDNUM2,
+	SKLSTF_ZIP,
+	SKLSTF_ADRES1,
+	SKLSTF_ADRES2,
+	SKLSTF_TELNO,
+	SKLSTF_ENCPN,
+	SKLSTF_RETIRE,
+	GO.COM_CODE_NM EMPLYM_SE,
+	NA.COM_CODE_NM SKLSTF_NLTY,
+	GEN.COM_CODE_NM SKLSTF_SEXDSTN
+
+	FROM
+	
+	STAFF
+	
+	INNER JOIN NATIONVIEW NA ON (NA.COM_CODE = SKLSTF_NLTY)
+	INNER JOIN GENVIEW GEN ON (GEN.COM_CODE = SKLSTF_SEXDSTN)
+	INNER JOIN GOYONG GO ON (GO.COM_CODE = EMPLYM_SE)
+	<include refid="searchPro" />
+	) A
+			<![CDATA[
+			WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+			]]>
+</select>
+</mapper>

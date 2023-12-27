@@ -1,0 +1,23 @@
+package kr.ac.usu.student.service;
+
+import java.io.File;
+import java.util.List;
+
+import kr.ac.usu.subject.vo.SubjectVO;
+import kr.ac.usu.user.vo.ComCodeVO;
+
+public interface StaffFreshManService {
+
+	// 단과대, 전공 셀렉트박스 가져오기
+	public List<SubjectVO> retrieveSubjectList();
+	
+	// 공통코드(입학 형태, 국적, 성별) 셀렉트박스 가져오기
+	public List<ComCodeVO> retrieveComCode();
+
+	// 엑셀 업로드
+	public void excelUpload(File destFile) throws Exception;
+	
+	// 엑셀 cell 1개 데이터 가져오기
+	public String excelDate(File destFile) throws Exception;
+
+}

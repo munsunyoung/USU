@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.usu.classroom.mapper.ProfessorClassroomBaseUIMapper">
+	
+	
+	<resultMap type="kr.ac.usu.lecture.vo.LectureVO" id="classroomLectureMap" autoMapping="true">
+		<id property="lctreNo" column="LCTRE_NO"/>
+		<association property="facilities" javaType="kr.ac.usu.facilities.vo.FacilitiesVO" autoMapping="true" >
+			<association property="building" javaType="kr.ac.usu.facilities.vo.BuildingVO" autoMapping="true">
+				<result property="buldNo" column="BULD_NO"/>
+			</association>
+		</association>
+		<association property="course" javaType="kr.ac.usu.course.vo.CourseVO" autoMapping="true" />
+		<collection property="timetable" ofType="kr.ac.usu.lecture.vo.LectureTimetableVO" >
+			<result column="TMTB_SE" property="tmtbSe"/>
+		</collection>
+	</resultMap>
+	<select id="selectClassroomProfessorLecture" parameterType="String" resultType="kr.ac.usu.lecture.vo.LectureVO" resultMap="classroomLectureMap">
+        WITH
+        LCTREVIEW AS ( SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC015'),
+        SEMSTRVIEW AS (SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC018'),
+        COMPLVIEW AS (SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC014'),
+        TMTBVIEW AS (SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC011'),
+        FACILITIESVIEW AS (
+			 	SELECT 
+			 		FCLTS_NO,
+			 		FCLTS_NM,
+					F.BULD_NO,
+					PRFSOR_NO,
+					BULD_NM,
+					CLG_NO
+				FROM 
+					FACILITIES F
+					INNER JOIN BUILDING B ON (F.BULD_NO = B.BULD_NO))
+		
+		SELECT
+	 		DISTINCT
+			L.LCTRE_NO,
+			LCTRE_NMPR,
+			L.FCLTS_NO,
+			L.PRFSOR_NO,
+			L.SEMSTR_SE,
+			S.COM_CODE_NM SEMSTR_SE_NM,
+			L.COURSE_NO,
+            C.COM_CODE_NM LCTRE_SE,
+            O.COM_CODE_NM COMPL_SE,
+            X.BULD_NM,
+            X.FCLTS_NM,
+            COURSE_NM,
+            T.COM_CODE_NM TMTB_SE
+               
+		FROM   LECTURE L
+                  LEFT OUTER JOIN LCTREVIEW C ON (C.COM_CODE = L.LCTRE_SE)
+                  LEFT OUTER JOIN SEMSTRVIEW S ON (S.COM_CODE = '0'||SUBSTR(L.SEMSTR_SE,5))
+                  LEFT OUTER JOIN COMPLVIEW O ON (O.COM_CODE = L.LCTRE_SE)
+                  LEFT OUTER JOIN FACILITIESVIEW X ON (X.FCLTS_NO = L.FCLTS_NO)
+                  INNER JOIN COURSE U ON (L.COURSE_NO = U.COURSE_NO)
+                  LEFT OUTER JOIN LECTURE_TIMETABLE V ON (L.LCTRE_NO = V.LCTRE_NO)
+                  LEFT OUTER JOIN TMTBVIEW T ON (V.TMTB_SE = T.COM_CODE)
+                  
+          WHERE L.PRFSOR_NO= #{prfsorNo,jdbcType=VARCHAR}
+	</select>
+	
+	
+</mapper>

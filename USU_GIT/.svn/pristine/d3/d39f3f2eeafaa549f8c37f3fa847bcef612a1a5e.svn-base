@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.usu.score.mapper.StudentScoreMapper">
+	<resultMap type="kr.ac.usu.score.vo.ScoreVO" id="scoreMap" autoMapping="true">
+		<association property="student" javaType="kr.ac.usu.user.vo.StudentVO" autoMapping="true" />
+		<association property="lecture" javaType="kr.ac.usu.lecture.vo.LectureVO" autoMapping="true">
+			<association property="course" javaType="kr.ac.usu.course.vo.CourseVO" autoMapping="true"/>
+		</association>
+	</resultMap>
+
+	<select id="selecteSemCdList" parameterType="HashMap" resultType="HashMap">
+		/* kr.ac.usu.score.mapper.StudentScoreMapper.selecteSemCdList */
+		SELECT DISTINCT
+		    '20'||SUBSTR(LCTRE_NO,5,2) || '년도' || SUBSTR(LCTRE_NO,7,1) || '학기' AS SEM_NM
+		    , '20'||SUBSTR(LCTRE_NO,5,3) AS SEM_CD
+		FROM
+		    SCORE
+		WHERE
+		    STDNT_NO = #{id}
+		AND
+		    SUBSTR(LCTRE_NO,5,3) != #{semCd}
+	</select>
+
+	<select id="selectScoreList" parameterType="HashMap" resultMap="scoreMap">
+		/* kr.ac.usu.score.mapper.StudentScoreMapper.selectScoreList */
+		WITH SCOREVIEW AS(
+			SELECT
+				S.LCTRE_NO
+			    , SUM(S.SCORE_SCORE * (LES.LCTRE_EVL_STDR_REFLCT/100) ) AS SCORE_SCORE
+			FROM
+				LECTURE_EVALUATION_STANDARD LES INNER JOIN SCORE S ON(LES.SCORE_SE = S.SCORE_SE)
+												INNER JOIN LECTURE L ON (L.LCTRE_NO = S.LCTRE_NO)
+			WHERE
+				STDNT_NO = #{id}
+			AND
+				SUBSTR(LES.LCTRE_ACNUTNO_NO,2) = S.LCTRE_NO
+			GROUP BY S.LCTRE_NO
+		), COMPLVIEW AS (
+            SELECT
+                COM_CODE,
+                COM_CODE_GRP,
+                COM_CODE_NM,
+                COM_CODE_DESC,
+                USE_YN,
+                COM_CODE_SEQ,
+                UPPER_CODE_GRP,
+                UPPER_COM_CODE
+            FROM
+                COM_CODE
+            WHERE
+                COM_CODE_GRP = 'SEC014'
+        )
+		SELECT
+			(SELECT PRINT_SCORE 
+		    FROM
+		    	SCORE_CHART
+		    WHERE 
+				SV.SCORE_SCORE BETWEEN MIN_SCORE AND MAX_SCORE
+		    ) PRINT_SCORE
+		    , C.COURSE_NM
+		    , L.LCTRE_NO
+            , C.COURSE_PNT
+            , CV.COM_CODE_NM COMPL_SE
+		FROM
+			SCOREVIEW SV INNER JOIN LECTURE L ON(SV.LCTRE_NO = L.LCTRE_NO)
+							INNER JOIN COURSE C ON (C.COURSE_NO = L.COURSE_NO)
+                            INNER JOIN COMPLVIEW CV ON (CV.COM_CODE = C.COMPL_SE)
+		WHERE
+			L.SEMSTR_SE = #{semCd}
+	</select>
+	<select id="selectCalScore" parameterType="HashMap" resultType="double">
+		WITH SCOREVIEW AS(
+			SELECT
+				S.LCTRE_NO
+			    , SUM(S.SCORE_SCORE * (LES.LCTRE_EVL_STDR_REFLCT/100) ) AS SCORE_SCORE
+			FROM
+				LECTURE_EVALUATION_STANDARD LES INNER JOIN SCORE S ON(LES.SCORE_SE = S.SCORE_SE)
+												INNER JOIN LECTURE L ON (L.LCTRE_NO = S.LCTRE_NO)
+			WHERE
+				STDNT_NO = #{id}
+			AND
+				SUBSTR(LES.LCTRE_ACNUTNO_NO,2) = S.LCTRE_NO
+			GROUP BY S.LCTRE_NO
+		), COMPLVIEW AS (
+            SELECT
+                COM_CODE,
+                COM_CODE_GRP,
+                COM_CODE_NM,
+                COM_CODE_DESC,
+                USE_YN,
+                COM_CODE_SEQ,
+                UPPER_CODE_GRP,
+                UPPER_COM_CODE
+            FROM
+                COM_CODE
+            WHERE
+                COM_CODE_GRP = 'SEC014'
+        ), TARGETVIEW AS 
+		(
+			SELECT
+				(SELECT CAL_SCORE 
+			    FROM
+			    	SCORE_CHART
+			    WHERE 
+					SV.SCORE_SCORE BETWEEN MIN_SCORE AND MAX_SCORE
+			    ) CAL_SCORE
+			    , C.COURSE_NM
+			    , L.LCTRE_NO
+	            , C.COURSE_PNT
+	            , CV.COM_CODE_NM COMPL_SE
+			FROM
+				SCOREVIEW SV INNER JOIN LECTURE L ON(SV.LCTRE_NO = L.LCTRE_NO)
+								INNER JOIN COURSE C ON (C.COURSE_NO = L.COURSE_NO)
+	                            INNER JOIN COMPLVIEW CV ON (CV.COM_CODE = C.COMPL_SE)
+			WHERE
+	            L.SEMSTR_SE = #{semCd}
+        ), TARGETVIEW2 AS(
+	        SELECT *
+	        FROM TARGETVIEW
+	        WHERE CAL_SCORE != 0
+        )
+        SELECT
+        	(SUM(CAL_SCORE * COURSE_PNT)/(COUNT(*)*1.0)) /4.5
+        FROM
+        	TARGETVIEW2
+	</select>
+</mapper>

@@ -1,0 +1,59 @@
+package kr.ac.usu.lecture.controller;
+
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.ac.usu.lecture.service.LectureLecturetService;
+import kr.ac.usu.lecture.vo.LectureVO;
+import kr.ac.usu.user.vo.SearchConditionVO;
+
+/**
+ * 
+ * @author PC-25
+ *
+ * @author 이재혁
+ * @since 2023. 11. 7.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet 
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일                          수정자               수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 7.      			  이재혁              최초작성
+ * 2023. 11.10.      			  김재성				수강중인 강의 목록 불러오기
+ * 2023. 11.13.      			  김재성				수강중인 강의 ajax 비동기 요청
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Controller
+public class LectureLectureController {
+	
+	@Inject
+	private LectureLecturetService service;
+	
+	@GetMapping("/professor/lectureList")
+	public String LectureListUI() {
+		return "/professor/lecture/lectureRetrieveLectureList";
+	}
+	
+	@GetMapping("/ajax/lectureList")
+	@ResponseBody
+	public List<LectureVO> lectureList(
+			SearchConditionVO searchCondition
+			,Authentication principal
+			) {
+		
+		String userId = principal.getName();
+		searchCondition.setUserId(userId);
+		List<LectureVO> lectureList = service.retrieveLectureList(searchCondition);
+		
+		return lectureList;
+	}
+}

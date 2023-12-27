@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.usu.lecture.mapper.ProfessorLectureMapper">
+	
+	<sql id="searchFrag"> 
+		<where>
+	    	<if test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	    		<choose>
+	    			<when test="simpleCondition.searchType eq 'clubNm'">
+	    				INSTR(CLUB_NM, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<when test="simpleCondition.searchType eq 'clubSe'">
+	    				INSTR(COM_CODE_NM, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<otherwise>
+	    				INSTR(CLUB_NM, #{simpleCondition.searchWord}) > 0
+	    				OR
+	    				INSTR(COM_CODE_NM, #{simpleCondition.searchWord}) > 0
+	    			</otherwise>
+	    		</choose>
+	    	</if>
+	    </where>
+	</sql>
+	
+	
+	<!-- 목록 페이지 총 수 -->
+	<select id="selectTotalRecord" resultType="int" parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM
+			
+	</select>
+	
+	<!-- 현재 강의중인 교수목록 -->
+	<resultMap type="kr.ac.usu.lecture.vo.LectureVO" id="lectureMap" autoMapping="true">
+		<id property="lctreNo" column="LCTRE_NO"/>
+		<association property="facilities" javaType="kr.ac.usu.facilities.vo.FacilitiesVO" autoMapping="true" >
+			<association property="building" javaType="kr.ac.usu.facilities.vo.BuildingVO" autoMapping="true" />
+		</association>
+		<association property="course" javaType="kr.ac.usu.course.vo.CourseVO" autoMapping="true" />
+		<collection property="timetable" ofType="kr.ac.usu.lecture.vo.LectureTimetableVO" autoMapping="true"/>
+	</resultMap>
+	<select id="SelectLectureList" resultType="kr.ac.usu.lecture.vo.LectureVO" parameterType="kr.ac.usu.paging.vo.PaginationInfo" resultMap="lectureMap">
+	SELECT B.*
+	FROM(
+	SELECT A.*
+	FROM(
+		WITH 
+			 LCTREVIEW AS (
+				SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC015'
+			 ),
+			 SEMSTRVIEW AS (
+				SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC018'
+			 ),
+			 COMPLVIEW AS (
+				SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC014'
+			 ),
+			 TMTBVIEW AS (
+				SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC011'
+			 ),
+			 FACILITIESVIEW AS (
+			 	SELECT 
+			 		FCLTS_NM,
+					BULD_NO,
+					PRFSOR_NO,
+					BULD_NM,
+					CLG_NO
+				FROM 
+					FACILITIES F
+				WHERE
+					LEFT OUTER JOIN BUILDING B ON (F.BULD_NO = B.BULD_NO)
+			 )
+		
+		SELECT
+			LCTRE_NO,
+			LCTRE_NMPR,
+			C.COM_CODE L.LCTRE_SE,
+			FCLTS_NO,
+			PRFSOR_NO,
+			E.COM_CODE L.SEMSTR_SE,
+			M.COM_CODE COMPL_SE,
+			COURSE_NO,
+			FCLTS_NM,
+			BULD_NM,
+			W.COM_CODE L.TMTB_SE
+		FROM
+			LECTURE L 
+				LEFT OUTER JOIN  LECTURE_TIMETABLE T ON(L.LCTRE_NO = T.LECTRE_NO AND L.TMTB_SE = T.TMTB_SE)
+				LEFT OUTER JOIN  FACILITIESVIEW A ON(L.FCLTS_NO = A.FCLTS_NO )
+				INNER JOIN FACILITIES F ON (L.FCLTS_NO = F.FCLTS_NO)
+				INNER JOIN LCTREVIEW C ON (C.COM_CODE = L.LCTRE_SE)
+				INNER JOIN SEMSTRVIEW E ON (E.COM_CODE = L.SEMSTR_SE)
+				INNER JOIN COMPLVIEW M ON (M.COM_CODE = L.COMPL_SE)
+				INNER JOIN TMTBVIEW W ON (W.COM_CODE = L.TMTB_SE)
+		)<include refid="searchFrag" />		
+		) B
+		 <![CDATA[
+	    WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+	    ]]>	
+	</select>
+</mapper>

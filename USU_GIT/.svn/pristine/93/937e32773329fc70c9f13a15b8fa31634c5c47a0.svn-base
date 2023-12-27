@@ -1,0 +1,284 @@
+/**
+ * <pre>
+ * 
+ * </pre>
+ * @author 문선영
+ * @since 2023. 11. 24.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일        수정자       수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 24.      문선영       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */ 
+ $(function(){
+	//------------------------------------------------------------------------------------------------
+
+    $('.class_list_wrap button').click(function () {
+        var tab_id = $(this).attr('data-tab');
+        $('.class_list_wrap button').removeClass('active');
+        $('.tab-content').removeClass('current');
+        $(this).addClass('active');
+        $("#" + tab_id).addClass('current');
+        $("#searchForm")[0].reset();
+        $("#searchSe").val(tab_id);
+        if(tab_id=='tab-2'){
+			$("#searchBtn2").trigger("click");
+		}else if(tab_id=='tab-3'){
+			$("#searchBtn3").trigger("click");
+		}
+    });
+    
+    $("#searchSe").val('tab-1');
+    
+    //------------------------------------------------------------------------------------------------
+ 
+	 $("#searchForm").on("submit", function(event){
+		event.preventDefault();
+		let data = $(this).serialize();
+		let searchSe = $("#searchSe").val();
+		$.getJSON(`/staff/registerStatus/ajax/registerStatusData?${data}`, function(resp){   // 요청 URL 설정 controller에 정해놓은거
+			if(searchSe=='tab-1'){
+				doubleMajorRequestList(resp);			
+			}else if(searchSe=='tab-2'){
+				minorRequestList(resp);
+			}else{
+				moveMajorRequestList(resp);
+			}			
+		});
+		return false;
+	}).submit();
+	
+	//------------------------------------------------------------------------------------------------
+
+	$("#searchUI1").on("click", "#searchBtn1", function(event){
+        let inputs = $(this).parents("#searchUI1").find(":input[name]");
+        $.each(inputs, function(idx, ipt){
+            let name = ipt.name;
+            let value = $(ipt).val();
+            $("#searchForm").find(`:input[name=${name}]`).val(value);
+        });
+            $("#searchForm").submit();
+    });
+    
+    //------------------------------------------------------------------------------------------------
+    
+    $("#searchUI2").on("click", "#searchBtn2", function(event){
+        let inputs = $(this).parents("#searchUI2").find(":input[name]");
+        $.each(inputs, function(idx, ipt){
+            let name = ipt.name;
+            let value = $(ipt).val();
+            $("#searchForm").find(`:input[name=${name}]`).val(value);
+        });
+            $("#searchForm").submit();
+    });
+    
+    //------------------------------------------------------------------------------------------------
+    
+    $("#searchUI3").on("click", "#searchBtn3", function(event){
+        let inputs = $(this).parents("#searchUI3").find(":input[name]");
+        $.each(inputs, function(idx, ipt){
+            let name = ipt.name;
+            let value = $(ipt).val();
+            $("#searchForm").find(`:input[name=${name}]`).val(value);
+        });
+            $("#searchForm").submit();
+    });
+    
+	//------------------------------------------------------------------------------------------------
+
+	$("#doubleMajorModal").on("show.bs.modal", function(event){
+		let $modal = $(this);
+		let trTag = event.relatedTarget;
+		let what = $(trTag).data("registerNo");
+		let url = "/staff/registerStatus/ajax/doubleMajorRequestView?what="+what;
+		$.get(url)
+			.done(function(resp){
+				$modal.find(".doubleMajorModal-body").html(resp);
+			});
+	}).on("hidden.bs.modal", function(event){
+		$(this).find(".doubleMajorModal-body").empty();
+	});
+	
+	$("#doubleMajorModal-close").click(function(){
+        $("#doubleMajorModal").modal('hide');
+    });
+    
+    //------------------------------------------------------------------------------------------------
+
+	$("#minorModal").on("show.bs.modal", function(event){
+		let $modal = $(this);
+		let trTag = event.relatedTarget;
+		let what = $(trTag).data("registerNo");
+		let url = "/staff/registerStatus/ajax/minorRequestView?what="+what;
+		$.get(url)
+			.done(function(resp){
+				$modal.find(".minorModal-body").html(resp);
+			});
+	}).on("hidden.bs.modal", function(event){
+		$(this).find(".minorModal-body").empty();
+	});
+	
+	$("#minorModal-close").click(function(){
+        $("#minorModal").modal('hide');
+    });
+    
+    //------------------------------------------------------------------------------------------------
+
+	$("#moveMajorModal").on("show.bs.modal", function(event){
+		let $modal = $(this);
+		let trTag = event.relatedTarget;
+		let what = $(trTag).data("registerNo");
+		let url = "/staff/registerStatus/ajax/moveMajorRequestView?what="+what;
+		$.get(url)
+			.done(function(resp){
+				$modal.find(".moveMajorModal-body").html(resp);
+			});
+	}).on("hidden.bs.modal", function(event){
+		$(this).find(".moveMajorModal-body").empty();
+	});
+	
+	$("#moveMajorModal-close").click(function(){
+        $("#moveMajorModal").modal('hide');
+    });
+
+ });
+ 
+//===================================================================================
+ 
+function fn_paging(page){
+	searchForm.page.value = page;
+	searchForm.requestSubmit();
+	searchForm.page.value = "";
+}
+
+function doubleMajorRequestList(resp){
+	let doubleMajorRequestList = resp.paging.dataList;
+	let trTags = null;
+	if(doubleMajorRequestList.length > 0){
+		$.each(doubleMajorRequestList, function(idx, doubleMajorRequest){
+			trTags += makeDoubleMajorTrTag(doubleMajorRequest);
+		});
+		$("#pagingArea1").html(resp.paging.pagingHTML);
+	}else{
+		trTags += `
+			<tr>
+				<td colspan="6" style="text-align: center;">복수전공 신청 목록이 없습니다.</td>
+			</tr>
+		`;
+		$("#pagingArea1").empty();
+	}
+	$("#listBody1").html(trTags);
+}
+
+function minorRequestList(resp){
+	let minorRequestList = resp.paging.dataList;
+	let trTags = null;
+	if(minorRequestList.length > 0){
+		$.each(minorRequestList, function(idx, minorRequest){
+			trTags += makeMinorTrTag(minorRequest);
+		});
+		$("#pagingArea2").html(resp.paging.pagingHTML);
+	}else{
+		trTags += `
+			<tr>
+				<td colspan="6" style="text-align: center;">부전공 신청 목록이 없습니다.</td>
+			</tr>
+		`;
+		$("#pagingArea2").empty();
+	}
+	$("#listBody2").html(trTags);
+}
+
+function moveMajorRequestList(resp){
+	let minorRequestList = resp.paging.dataList;
+	let trTags = null;
+	if(minorRequestList.length > 0){
+		$.each(minorRequestList, function(idx, moveMajorrRequest){
+			trTags += makemoveMajorTrTag(moveMajorrRequest);
+		});
+		$("#pagingArea3").html(resp.paging.pagingHTML);
+	}else{
+		trTags += `
+			<tr>
+				<td colspan="6" style="text-align: center;">전과 신청 목록이 없습니다.</td>
+			</tr>
+		`;
+		$("#pagingArea3").empty();
+	}
+	$("#listBody3").html(trTags);
+}
+ 
+ 
+//------------------------------------------------------------------------------------------------
+
+function makeDoubleMajorTrTag(doubleMajor){
+	let trTag = `
+		<tr data-register-no="${doubleMajor.sknrgNo}" id="doubleMajorModal-open" data-toggle="modal" data-target="#doubleMajorModal">
+            <td>${doubleMajor.rnum}</td>
+            <td>${doubleMajor.stdntNo}</td>
+            <td>${doubleMajor.student.stdntNm}</td>
+            <td>${doubleMajor.student.sknrgSttusMajor1}</td>
+            <td>${doubleMajor.sknrgDate}</td>             
+            <td>${doubleMajor.confmSe}</td>
+        </tr>
+	`; 
+	return trTag;
+}
+
+function makeMinorTrTag(minor){
+	let trTag = `
+		<tr data-register-no="${minor.sknrgNo}" id="minorModal-open" data-toggle="modal" data-target="#minorModal">
+            <td>${minor.rnum}</td>
+            <td>${minor.stdntNo}</td>
+            <td>${minor.student.stdntNm}</td>
+            <td>${minor.student.sknrgSttusMajor1}</td>
+            <td>${minor.sknrgDate}</td>             
+            <td>${minor.confmSe}</td>
+        </tr>
+	`; 
+	return trTag;
+}
+
+function makemoveMajorTrTag(moveMajor){
+	let trTag = `
+		<tr data-register-no="${moveMajor.sknrgNo}" id="moveMajorModal-open" data-toggle="modal" data-target="#moveMajorModal">
+            <td>${moveMajor.rnum}</td>
+            <td>${moveMajor.stdntNo}</td>
+            <td>${moveMajor.student.stdntNm}</td>
+            <td>${moveMajor.student.sknrgSttusMajor1}</td>
+            <td>${moveMajor.sknrgDate}</td>             
+            <td>${moveMajor.confmSe}</td>
+        </tr>
+	`; 
+	return trTag;
+}
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

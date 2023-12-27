@@ -1,0 +1,52 @@
+package kr.ac.usu.consultation.service;
+
+import kr.ac.usu.consultation.vo.ConsultationRequestVO;
+import kr.ac.usu.consultation.vo.ConsultationVO;
+import kr.ac.usu.paging.vo.PaginationInfo;
+
+/**
+ * <pre>
+ * 
+ * </pre>
+ * @author 김재성
+ * @since 2023. 11. 17.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 	  수정일    		    수정자       수정내용
+ * --------------     --------    ----------------------
+ * 2023. 11. 17.     	김재성       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */ 
+public interface ProfessorConsultationService {
+	
+	/**
+	 * 교수 상담이력 리스트 출력
+	 * @param paging
+	 * @return List<ConsultationVO>
+	 */
+	public void retrieveProfessorConsultationList(PaginationInfo<ConsultationVO> paging);
+	
+	/**
+	 * 교수 상담이력 상세정보 출력
+	 * @param cnsltNo
+	 * @return ConsultationVO
+	 */
+	public ConsultationVO retrieveProfessorConsultationInfo(String cnsltNo);
+	
+	/**
+	 * 교수 상담신청 리스트 출력
+	 * @param paging
+	 * @return List<ConsultationRequestVO>
+	 */
+	public void retrieveProfessorConsultationRequestList(PaginationInfo<ConsultationRequestVO> paging);
+
+	/**
+	 * 교수 상담신청 건에 대한 상세정보 출력
+	 * @param cnsltNo
+	 * @return ConsultationRequestVO
+	 */
+	public ConsultationRequestVO retrieveProfessorConsultationRequestInfo(String cnsltNo);
+
+}

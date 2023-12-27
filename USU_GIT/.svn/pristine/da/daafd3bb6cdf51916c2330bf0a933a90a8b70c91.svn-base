@@ -1,0 +1,182 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>    
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+<style>
+.secondModal {margin-top: 200px;}
+.sub_tit04{font-size: 18px;color: #304b73;padding-left:0px;font-weight: 600;width: 100%;float:left; text-align:left; margin-bottom:5px;}   
+.sub_tit04 span{    width: 8px;
+    height: 8px;
+    background: #304b73;
+    display: block;
+    float: left;
+    margin-right: 8px;
+    position: relative;
+    top: 9px;}
+.profile_img{width:30%; float:left; height:213px;}   
+.profile_img img {width:100%; height:100%;} 
+.table_left {width:30% !important; float:left; }
+.table_middle {width:30% !important; float:inherit; }
+.table_right {width:30% !important; float:right; }
+.tab-content {min-height: 700px;}
+.minHeight600 {min-height: 600px;}
+.minHeight700 {min-height: 700px;}
+.div_left {display: inline-block; width:40%; float:left;}
+.div_right {display: inline-block; width:40%; float:right;}
+.form-style01 {width:185px;}
+.long_form {width:400px;}
+label{margin-top: 10px;}
+.div_outer{margin-right: 35px; margin-left: 40px}
+</style>
+
+<!-- Begin Page Content -->
+<div class="container-fluid">
+	<div class="card2">
+		<div class="sub_tit02">신입생 등록</div>
+		
+		<div class="sub_tit02 sub_tit04"><span></span>일괄 등록</div>
+			<form id="excelUploadForm" name="excelUploadForm" enctype="multipart/form-data" method="post" action="/staff/freshMan/ajax/excelUpload">
+    			<div class="contents">
+        			<div>첨부파일은 한개만 등록 가능합니다.</div>
+ 
+        			<dl class="vm_name">
+						<dt class="down w90">첨부 파일</dt>
+						<dd><input id="excelFile" type="file" name="excelFile"/></dd>
+					</dl>        
+    			</div>            
+    			<div class="bottom">
+        			<button type="button" id="addExcelImpoartBtn" class="btn" onclick="check()"><span>추가</span></button> 
+    			</div>
+			</form> 
+
+
+		
+		<div class="sub_tit02 sub_tit04" style="margin-top: 40px;"><span></span>개별 등록</div>
+		<div class="div_left div_outer">
+			<label for="inputStdntNm">학생명</label>
+			<input type="text" name="inputStdntNm" class="form-style01" required/>
+			
+			<label for="stdntIhidnum1">주민등록번호</label><br/>
+			<input type="text" name="inputStdntIhidnum1" class="form-style01" required style="display: inline-block; width:170px;"/> - 
+			<input type="text" name="inputStdntIhidnum2" class="form-style01" required style="display: inline-block; width:170px;"/><br/>
+			
+			<label for="inputStdntTelno">휴대폰 번호</label>
+            <input type="text" name="inputStdntTelno" class="form-style01" placeholder="'-'포함하여 입력" required/>
+            
+			<div class="div_left">
+				<label for="inputClgNo">단과대</label>
+	            <select name="inputClgNo" class="form-style01" required>
+					<option value="" label="선택">
+					<c:forEach items="${subject.college.clgNm}" var="clgNm">
+						
+					</c:forEach>
+				</select>
+			</div>
+            <div class="div_right">
+	            <label for="inputSknrgSttusMajor1">전공</label>
+				<select name="inputSknrgSttusMajor1" class="form-style01" required>
+					<option value="" label="선택">
+	
+				</select>
+			</div>
+			
+			<div class="div_left">
+				<label for="inputSknrgSttusEntsch">입학일</label>
+	            <input type="date" name="inputSknrgSttusEntsch" class="form-style01 datepicker"/>
+			</div>
+            <div class="div_right">
+	            <label for="inputSknrgSttusEnterenceSe">입학 형태</label>
+				<select name="inputSknrgSttusEnterenceSe" class="form-style01" required>
+					<option value="" label="선택">
+	
+				</select>
+			</div>
+		
+		</div>
+		
+		<div class="div_left div_outer">
+			<label for="inputStdntZip">우편번호</label><br/>
+            <input type="text" name="inputStdntZip" class="form-style01" id="sample6_postcode" required style="display: inline-block;"/>
+			<input type="button" id="zipBtn" value="우편번호 찾기" class="btn btn-primary" style="margin-left: 15px;"><br/>
+			
+			<label for="inputStdntAdres1">기본주소</label>
+            <input type="text" name="inputStdntAdres1" class="form-style01 long_form" id="sample6_address" required/>
+            
+            <label for="inputStdntAdres2">상세주소</label>
+            <input type="text" name="inputStdntAdres2" class="form-style01 long_form" id="sample6_detailAddress"/>
+
+			<div class="div_left">
+				<label for="inputNltySe">국적</label>
+	            <select name="inputNltySe" class="form-style01" required>
+					<option value="" label="선택">
+	
+				</select>
+			</div>
+            <div class="div_right">
+	            <label for="inputSexdstnSe">성별</label>
+				<select name="inputSexdstnSe" class="form-style01" required>
+					<option value="" label="선택">
+	
+				</select>
+			</div>
+		</div>
+
+	</div>
+<!-- 	<div> -->
+<!-- 		<form id="freshManInsertForm" action="" method="post"> -->
+<!-- 			stdntNm<input type="text" id="stdntNm" name="stdntNm" value=""> -->
+<!-- 			stdntIhidnum1<input type="text" id="stdntIhidnum1" name="stdntIhidnum1" value=""> -->
+<!-- 			stdntIhidnum2<input type="text" id="stdntIhidnum2" name="stdntIhidnum2" value=""> -->
+<!-- 			stdntTelno<input type="text" id="stdntTelno" name="stdntTelno" value=""> -->
+<!-- 			단과대<input type="text" id="clgNo" name="clgNo" value=""> -->
+<!-- 			전공<input type="text" id="sknrgSttusMajor1" name="sknrgSttusMajor1" value=""> -->
+<!-- 			입학일<input type="text" id="sknrgSttusEntsch" name="sknrgSttusEntsch" value=""> -->
+<!-- 			입학형식<input type="text" id="sknrgSttusEnterenceSe" name="sknrgSttusEnterenceSe" value=""> -->
+<!-- 			우편번호<input type="text" id="sknrgSttusEntsch" name="sknrgSttusEntsch" value=""> -->
+<!-- 			기본주소<input type="text" id="stdntAdres1" name="stdntAdres1" value=""> -->
+<!-- 			상세주소<input type="text" id="stdntAdres2" name="stdntAdres2" value=""> -->
+<!-- 			국적<input type="text" id="nltySe" name="nltySe" value=""> -->
+<!-- 			성별<input type="text" id="sexdstnSe" name="sexdstnSe" value=""> -->
+<!-- 			<input type="submit" value="저장" class="btn btn-primary ft_right applyBtn" style="margin-right:10px;"> -->
+<!-- 		</form> -->
+<!-- 	</div> -->
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<script src="/resources/js/app/msy/staffFreshMan.js"></script>
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.js"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js" integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

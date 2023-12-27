@@ -1,0 +1,30 @@
+package kr.ac.usu.club.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+
+/**
+ * 
+ * @author PC-25
+ *
+ * @author 이재혁
+ * @since 2023. 11. 7.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet 
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일                          수정자               수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 9.      문선영       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Controller
+public class StaffClubUIController {
+	
+	@GetMapping("/staff/clubListUI")
+	public String clubView() {
+		return "staff/club/clubListUI";
+	}
+
+}

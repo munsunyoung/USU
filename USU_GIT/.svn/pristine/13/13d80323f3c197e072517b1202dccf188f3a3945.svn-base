@@ -1,0 +1,50 @@
+package kr.ac.usu.classroom.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.ac.usu.classroom.service.StudentClassroomService;
+import kr.ac.usu.lecture.vo.LectureVO;
+import kr.ac.usu.user.mapper.LoginMapper;
+
+@Controller
+@RequestMapping("/student/classroom")
+public class StudentClassRoomController {
+
+	@Inject
+	private StudentClassroomService service;
+	
+	@GetMapping
+	public String classRoomListUI(
+			Model model
+			, Authentication auth
+		) {
+		String id = auth.getName();
+		String semCd = LoginMapper.getCurrentRegularSemesterCode();
+		List<LectureVO> list = service.retrieveClassRoomList(id, semCd);
+		model.addAttribute("list", list);
+		return "student/classroom/studentClassRoomUI";
+	}
+	
+	@GetMapping("test/{lctreNo}")
+	public String classRoomDetailInfo(
+			Model model
+			, Authentication auth
+			, @PathVariable String lctreNo
+		) {
+		String id = auth.getName();
+		String semCd = LoginMapper.getCurrentRegularSemesterCode();
+		service.retrieveHomeWorkList(id, semCd, lctreNo);
+		service.retrieveTestQuestionList(id, semCd, lctreNo);
+		
+		return "jsonView";
+	}
+}

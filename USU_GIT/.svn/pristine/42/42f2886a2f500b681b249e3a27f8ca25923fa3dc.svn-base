@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.usu.lecture.mapper.ProfessorLectureMapper">
+	
+	<select id="othersCollegeList" resultType="kr.ac.usu.facilities.vo.CollegeVO">
+		SELECT
+			CLG_NO
+			,CLG_NM
+			,CLG_DEAN
+		FROM
+			COLLEGE
+	</select>
+	
+	<select id="othersSubjectList" resultType="kr.ac.usu.subject.vo.SubjectVO" parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+		SELECT
+			SUBJCT_NO
+			,SUBJCT_NM
+			,SUBJCT_OFFM
+			,SUBJCT_TELNO
+			,SUBJCT_DEAN
+			,CLG_NO
+		FROM
+			SUBJECT
+		<where>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(clgNo)">
+				CLG_NO=#{clgNo}
+			</if>
+		</where>	
+	</select>
+	
+	<sql id="searchLecture">
+			<where>
+				<if
+					test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+					<choose>
+						<when test="simpleCondition.searchType eq 'semstrSe'">
+							SUBSTR(SEMSTR_SE,5,1)=#{simpleCondition.searchWord}
+						</when>
+						<when test="simpleCondition.searchType eq 'courseNm'">
+							INSTR(COURSE_NM,#{simpleCondition.searchWord}) > 0
+						</when>
+						<when test="simpleCondition.searchType eq 'lctreSe'">
+							INSTR(LCTRE_SE,#{simpleCondition.searchWord}) > 0
+						</when>
+						<otherwise>
+							INSTR(SEMSTR_SE,#{simpleCondition.searchWord}) > 0
+							OR
+							INSTR(COURSE_NM,#{simpleCondition.searchWord}) > 0
+							OR
+							INSTR(LCTRE_SE,#{simpleCondition.searchWord}) > 0
+						</otherwise>
+					</choose>
+				</if>
+			</where>
+	</sql>
+	
+	<select id="lectureSelectTotalRecord" resultType="int" parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+		WITH
+	        LCTREVIEW AS ( SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC015'),
+	        SEMSTRVIEW AS (SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC018'),
+	        COMPLVIEW AS (SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC014'),
+	        TMTBVIEW AS (SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC011'),
+	        FACILITIESVIEW AS (
+				 	SELECT 
+				 		FCLTS_NO,
+				 		FCLTS_NM,
+						F.BULD_NO,
+						PRFSOR_NO,
+						BULD_NM,
+						CLG_NO
+		FROM 
+			FACILITIES F
+			INNER JOIN BUILDING B ON (F.BULD_NO = B.BULD_NO))
+						
+		SELECT COUNT(*)
+		FROM(
+			SELECT ROW_NUMBER() OVER(ORDER BY LCTRE_NO) RNUM, B.*
+			FROM(
+			SELECT A.*
+				FROM(
+				SELECT
+			 		
+					L.LCTRE_NO,
+					LCTRE_NMPR,
+					L.FCLTS_NO,
+					L.PRFSOR_NO,
+					L.SEMSTR_SE,
+					S.COM_CODE_NM SEMSTR_SE_NM,
+					L.COURSE_NO,
+	                C.COM_CODE_NM LCTRE_SE,
+	                O.COM_CODE_NM COMPL_SE,
+	                X.BULD_NM,
+	                X.FCLTS_NM,
+	                COURSE_NM,
+	                T.COM_CODE_NM TMTB_SE
+	                
+				FROM
+					LECTURE L
+	                   LEFT OUTER JOIN LCTREVIEW C ON (C.COM_CODE = L.LCTRE_SE)
+	                   LEFT OUTER JOIN SEMSTRVIEW S ON (S.COM_CODE = L.LCTRE_SE)
+	                   LEFT OUTER JOIN COMPLVIEW O ON (O.COM_CODE = L.LCTRE_SE)
+	                   LEFT OUTER JOIN FACILITIESVIEW X ON (X.FCLTS_NO = L.FCLTS_NO)
+	                   INNER JOIN COURSE U ON (L.COURSE_NO = U.COURSE_NO)
+	                   LEFT OUTER JOIN LECTURE_TIMETABLE V ON (L.LCTRE_NO = V.LCTRE_NO)
+	                   LEFT OUTER JOIN TMTBVIEW T ON (V.TMTB_SE = T.COM_CODE)
+						
+				WHERE L.PRFSOR_NO=#{detailCondition.prfsorNo}
+				) A
+				<include refid="searchLecture"/>
+				) B) 
+	</select>
+	
+	<!-- 교수의 강의목록 -->
+	<resultMap type="kr.ac.usu.lecture.vo.LectureVO" id="lectureMap" autoMapping="true">
+		<id property="lctreNo" column="LCTRE_NO"/>
+		<association property="facilities" javaType="kr.ac.usu.facilities.vo.FacilitiesVO" autoMapping="true" >
+			<association property="building" javaType="kr.ac.usu.facilities.vo.BuildingVO" autoMapping="true">
+				<result property="buldNo" column="BULD_NO"/>
+			</association>
+		</association>
+		<association property="course" javaType="kr.ac.usu.course.vo.CourseVO" autoMapping="true" />
+		<collection property="timetable" ofType="kr.ac.usu.lecture.vo.LectureTimetableVO" >
+			<result column="TMTB_SE" property="tmtbSe"/>
+		</collection>
+	</resultMap>
+	<select id="selectLectureList" parameterType="kr.ac.usu.course.vo.CourseVO" resultMap="lectureMap">
+		
+        WITH
+        LCTREVIEW AS ( SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC015'),
+        SEMSTRVIEW AS (SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC018'),
+        COMPLVIEW AS (SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC014'),
+        TMTBVIEW AS (SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC011'),
+        FACILITIESVIEW AS (
+			 	SELECT 
+			 		FCLTS_NO,
+			 		FCLTS_NM,
+					F.BULD_NO,
+					PRFSOR_NO,
+					BULD_NM,
+					CLG_NO
+				FROM 
+					FACILITIES F
+					INNER JOIN BUILDING B ON (F.BULD_NO = B.BULD_NO))
+			
+			
+			SELECT DISTINCT B.*
+			FROM(
+			SELECT ROW_NUMBER() OVER(ORDER BY LCTRE_NO) RNUM, A.*
+				FROM(
+				SELECT
+			 		DISTINCT
+					L.LCTRE_NO,
+					LCTRE_NMPR,
+					L.FCLTS_NO,
+					L.PRFSOR_NO,
+					L.SEMSTR_SE,
+					S.COM_CODE_NM SEMSTR_SE_NM,
+					L.COURSE_NO,
+	                C.COM_CODE_NM LCTRE_SE,
+	                O.COM_CODE_NM COMPL_SE,
+	                X.BULD_NM,
+	                X.FCLTS_NM,
+	                COURSE_NM,
+	                T.COM_CODE_NM TMTB_SE
+	                
+				FROM   LECTURE L
+	                   LEFT OUTER JOIN LCTREVIEW C ON (C.COM_CODE = L.LCTRE_SE)
+	                   LEFT OUTER JOIN SEMSTRVIEW S ON (S.COM_CODE = '0'||SUBSTR(L.SEMSTR_SE,5))
+	                   LEFT OUTER JOIN COMPLVIEW O ON (O.COM_CODE = L.LCTRE_SE)
+	                   LEFT OUTER JOIN FACILITIESVIEW X ON (X.FCLTS_NO = L.FCLTS_NO)
+	                   INNER JOIN COURSE U ON (L.COURSE_NO = U.COURSE_NO)
+	                   LEFT OUTER JOIN LECTURE_TIMETABLE V ON (L.LCTRE_NO = V.LCTRE_NO)
+	                   LEFT OUTER JOIN TMTBVIEW T ON (V.TMTB_SE = T.COM_CODE)
+						
+				WHERE L.PRFSOR_NO=#{detailCondition.prfsorNo}
+				) A
+				<include refid="searchLecture"/>
+				ORDER BY COURSE_NM DESC
+				) B
+				<![CDATA[
+					WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+				]]>
+				
+	</select>
+	
+	
+
+
+
+	
+	
+	<resultMap type="kr.ac.usu.user.vo.StudentVO" id="studentListMap" autoMapping="true">
+		<id property="stdntNo" column="STDNT_NO"/>
+		<association property="subject" javaType="kr.ac.usu.subject.vo.SubjectVO" autoMapping="true" />
+	</resultMap>
+	<select id="selectLectureStudentList" parameterType="String" resultMap="studentListMap">
+		    SELECT
+		    	 DISTINCT
+		         S.STDNT_NO
+		        ,S.STDNT_NM
+		        ,S.STDNT_TELNO
+		        ,D.COM_CODE_NM NLTY_SE
+		        ,E.COM_CODE_NM SEXDSTN_SE
+		        ,Q.SKNRG_STTUS_GRADE
+		        ,G.SUBJCT_NM SKNRG_STTUS_MAJOR1
+		        ,W.COM_CODE_NM ENTERENCE_SE
+		        ,L.LCTRE_NO
+		        
+		    FROM
+		        STUDENT A INNER JOIN STUDENT_INFORMATION S ON (A.STDNT_NO=S.STDNT_NO)
+		        INNER JOIN COM_CODE D ON (S.NLTY_SE = D.COM_CODE)
+		        INNER JOIN COM_CODE E ON (S.SEXDSTN_SE = E.COM_CODE)
+		        INNER JOIN SCHOOL_REGISTER_STATUS Q ON (A.STDNT_NO = Q.STDNT_NO)
+		        INNER JOIN COM_CODE W ON (Q.SKNRG_STTUS_ENTERENCE_SE = W.COM_CODE)
+		        INNER JOIN SUBJECT G ON (Q.SKNRG_STTUS_MAJOR1 = G.SUBJCT_NO)
+		        INNER JOIN ATTENDANCE_LECTURE C ON (S.STDNT_NO = C.STDNT_NO)
+		        INNER JOIN LECTURE L ON (C.LCTRE_NO = L.LCTRE_NO)
+		    WHERE
+		    D.COM_CODE_GRP = 'SEC002'
+		    AND E.COM_CODE_GRP = 'SEC001'
+		    AND W.COM_CODE_GRP = 'SEC012'
+		    AND E.COM_CODE_GRP = 'SEC001'
+		    AND L.LCTRE_NO = #{lctreNo}
+	</select>
+	
+</mapper>

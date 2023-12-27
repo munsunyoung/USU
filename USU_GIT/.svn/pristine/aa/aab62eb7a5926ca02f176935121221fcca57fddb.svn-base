@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--  [[개정이력(Modification Information)]]       -->
+<!--  수정일          수정자     수정내용               -->
+<!--  ==========   ======    ==============        -->
+<!--  2023. 11. 14.       김석호     최초작성               -->
+<!--  Copyright (c) 2023 by DDIT All right reserved -->
+<mapper namespace="kr.ac.usu.student.mapper.StudentRegisterMapper">
+	<select id="selectRegisterRequestList">
+	/* kr.ac.usu.student.mapper.StudentRegisterMapper.selectRegisterRequestList */
+	</select>
+	<select id="selectRegisterRequest">
+	/* kr.ac.usu.student.mapper.StudentRegisterMapper.selectRegisterRequest */
+	</select>
+	<insert id="insertRegisterRequest" >
+	/* kr.ac.usu.student.mapper.StudentRegisterMapper.insertRegisterRequest */
+	</insert>
+	<delete id="deleteRegisterRequest">
+	/* kr.ac.usu.student.mapper.StudentRegisterMapper.deleteRegisterRequest */
+	</delete>
+</mapper>

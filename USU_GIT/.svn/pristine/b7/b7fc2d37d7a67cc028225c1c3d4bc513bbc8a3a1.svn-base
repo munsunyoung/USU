@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.usu.lecture.mapper.ProfessorLectureMapper">
+	
+	<select id="othersCollegeList" resultType="kr.ac.usu.facilities.vo.CollegeVO">
+		SELECT
+			CLG_NO
+			,CLG_NM
+			,CLG_DEAN
+		FROM
+			COLLEGE
+	</select>
+	
+	<select id="othersSubjectList" resultType="kr.ac.usu.subject.vo.SubjectVO" parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+		SELECT
+			SUBJCT_NO
+			,SUBJCT_NM
+			,SUBJCT_OFFM
+			,SUBJCT_TELNO
+			,SUBJCT_DEAN
+			,CLG_NO
+		FROM
+			SUBJECT
+		<where>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(clgNo)">
+				CLG_NO=#{clgNo}
+			</if>
+		</where>	
+	</select>
+	
+	
+	<!-- 현재 강의중인 교수목록 -->
+	<resultMap type="kr.ac.usu.lecture.vo.LectureVO" id="lectureMap" autoMapping="true">
+		<id property="lctreNo" column="LCTRE_NO"/>
+		<association property="facilities" javaType="kr.ac.usu.facilities.vo.FacilitiesVO" autoMapping="true" >
+			<association property="building" javaType="kr.ac.usu.facilities.vo.BuildingVO" autoMapping="true">
+				<result property="buldNo" column="BULD_NO"/>
+			</association>
+		</association>
+		<association property="course" javaType="kr.ac.usu.course.vo.CourseVO" autoMapping="true" />
+		<collection property="timetable" ofType="kr.ac.usu.lecture.vo.LectureTimetableVO" >
+			<result column="TMTB_SE" property="tmtbSe"/>
+		</collection>
+	</resultMap>
+	<select id="selectLectureList" parameterType="kr.ac.usu.user.vo.SearchConditionVO" resultMap="lectureMap">
+		
+        WITH
+        LCTREVIEW AS (
+					SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC015'
+				 ),
+         SEMSTRVIEW AS (
+					SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC018'
+				 ),
+         COMPLVIEW AS (
+                SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC014'
+         ),
+          FACILITIESVIEW AS (
+				 	SELECT 
+				 		FCLTS_NO,
+				 		FCLTS_NM,
+						F.BULD_NO,
+						PRFSOR_NO,
+						BULD_NM,
+						CLG_NO
+					FROM 
+						FACILITIES F
+						INNER JOIN BUILDING B ON (F.BULD_NO = B.BULD_NO)
+        ),
+        TMTBVIEW AS (
+					SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC011'
+				 )
+			SELECT
+		 		
+				L.LCTRE_NO,
+				LCTRE_NMPR,
+				L.FCLTS_NO,
+				L.PRFSOR_NO,
+				L.SEMSTR_SE,
+				S.COM_CODE_NM SEMSTR_SE_NM,
+				L.COURSE_NO,
+                C.COM_CODE_NM LCTRE_SE,
+                O.COM_CODE_NM COMPL_SE,
+                X.BULD_NM,
+                X.FCLTS_NM,
+                COURSE_NM,
+                T.COM_CODE_NM TMTB_SE
+                
+			FROM
+				LECTURE L
+                   LEFT OUTER JOIN LCTREVIEW C ON (C.COM_CODE = L.LCTRE_SE)
+                   LEFT OUTER JOIN SEMSTRVIEW S ON (S.COM_CODE = L.LCTRE_SE)
+                   LEFT OUTER JOIN COMPLVIEW O ON (O.COM_CODE = L.LCTRE_SE)
+                   LEFT OUTER JOIN FACILITIESVIEW X ON (X.FCLTS_NO = L.FCLTS_NO)
+                   INNER JOIN COURSE U ON (L.COURSE_NO = U.COURSE_NO)
+                   LEFT OUTER JOIN LECTURE_TIMETABLE V ON (L.LCTRE_NO = V.LCTRE_NO)
+                   LEFT OUTER JOIN TMTBVIEW T ON (V.TMTB_SE = T.COM_CODE)
+					
+			WHERE L.PRFSOR_NO=#{userId}
+			
+<!-- 			<trim prefix="WHERE" prefixOverrides="AND"> -->
+<!-- 				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(search.userId)"> -->
+<!-- 					L.PRFSOR_NO=#{userId} -->
+<!-- 				</if> -->
+<!-- 				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(search.year)"> -->
+<!-- 				AND SUBSTR(L.SEMSTR_SE,0,4)=#{year} -->
+<!-- 				</if> -->
+<!-- 				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(search.semstrNo)"> -->
+<!-- 				 AND SUBSTR(L.SEMSTR_SE,4,1)=#{semstrNo} -->
+<!-- 				</if> -->
+<!-- 			</trim> -->
+
+	</select>
+	
+	
+
+
+	<sql id="searchCourse">
+		<where>
+			<if
+				test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+				<choose>
+					<when test="simpleCondition.searchType eq 'courseNm'">
+						INSTR(COURSE_NM, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'subjctNm'">
+						INSTR(SUBJCT_NM, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'clgNm'">
+						INSTR(CLG_NM, #{simpleCondition.searchWord}) > 0
+					</when>
+					<otherwise>
+						INSTR(COURSE_NM, #{simpleCondition.searchWord}) > 0
+					</otherwise>
+				</choose>
+			</if>
+		</where>
+	</sql>
+
+	<select id="selectTotalRecord" resultType="int" parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM COURSE
+		<include refid="searchCourse" />
+	</select>
+	
+	
+	<resultMap type="kr.ac.usu.course.vo.CourseVO" id="courseMap"
+		autoMapping="true">
+		<id property="courseNo" column="COURSE_NO" />
+	</resultMap>
+	<select id="selectCourseList"
+		parameterType="kr.ac.usu.paging.vo.PaginationInfo"
+		resultMap="courseMap">
+		WITH T AS(
+		    SELECT ROW_NUMBER() OVER(ORDER BY A.SUBJCT_NO) RNUM
+		    	 , COURSE_NO
+		         , SUBSTR(A.COURSE_NO,1,1) CLG_NO
+		         , A.COURSE_NM
+		         , A.COURSE_PNT
+		         , (SELECT CC.COM_CODE_NM FROM com_code CC WHERE CC.com_code_grp = 'SEC014' AND CC.COM_CODE = A.COMPL_SE) COMPL_SE     
+		         , (SELECT B.CLG_NM FROM COLLEGE B WHERE B.CLG_NO = SUBSTR(A.COURSE_NO,1,1)) CLG_NM
+		         , S.SUBJCT_NM
+		         , A.SUBJCT_NO     
+		    FROM   COURSE A, SUBJECT S
+		    WHERE  A.SUBJCT_NO = S.SUBJCT_NO
+			<include refid="searchCourse" />
+		)
+		SELECT T.* FROM T
+		<![CDATA[
+			WHERE T.RNUM >= #{startRow} AND T.RNUM <= #{endRow}
+		]]>
+	</select>
+	
+</mapper>

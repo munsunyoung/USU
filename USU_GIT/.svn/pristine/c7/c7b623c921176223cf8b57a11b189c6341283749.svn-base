@@ -1,0 +1,40 @@
+package kr.ac.usu.score.service;
+
+import java.util.List;
+
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.ac.usu.lecture.vo.LectureVO;
+import kr.ac.usu.score.vo.ScoreObjectionVO;
+
+/**
+ * @author PC-21
+ *
+ * @author 김재성
+ * @since 2023. 12. 04.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet 
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 	수정일            수정자            수정내용
+ * ----------     --------    ----------------------
+ * 2023.12.04.      김재성       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+public interface ProfessorScoreService {
+	
+	/**
+	 * 교수가 강의중인 강의목록
+	 * @param lctreNo 교수번호
+	 * @return List<LectureVO>
+	 */
+	public List<LectureVO> retrieveScoreProfessorLecture(String prfsorNo);
+	
+	/**
+	 * 한 강의에 성적에 대한 이의신청 목록
+	 * @param lctreNo
+	 * @return
+	 */
+	public List<ScoreObjectionVO> retrieveScoreObjectionList(@RequestParam("lctreNo") String lctreNo);
+}

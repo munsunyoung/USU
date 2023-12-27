@@ -1,0 +1,288 @@
+/**
+ * 
+ */
+/**
+
+ * </pre>
+ * @author 김재성
+ * @since 2023. 11. 10.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ *  수정일         수정자       수정내용
+ * --------     ------    ----------------
+ * 2023.11.10.   김재성       최초작성
+ * 2023.11.13.   김재성       강의내역 출력
+ * 2023.11.14.   김재성       강의내역 수정
+ * 2023.11.15.   김재성       강의내역 검색 수정
+ * 2023.11.17.   김재성       강의 상세보기
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+
+
+/*
+function getList(){
+	
+	let searchType = $("#secarhForm")[0].searchType.value;
+	let searchWord = $("#searchWord")[0].searchWord.value;
+
+	let SearchVO = {
+		searchType,
+		searchWord,
+		searchPage: "1"
+	}
+	console.log("체킁:",SearchVO);
+	*/
+
+/*
+	$.ajax({
+		url:'/professor/ajax/lectureList?${data}',
+		method :"GET",
+		// data: SearchVO,
+		type : "JSON",
+		success : function(rslt){
+
+			console.log("체킁:",rslt);	
+
+			let lectureList = rslt.paging.dataList;
+								
+			let listTags = null;
+			if (lectureList.length > 0 ){
+				$.each(lectureList, function(i,lecture){
+					listTags += 
+						makeTags(lecture);
+				});
+				$(pagingArea).html(resp.paging.pagingHTML);
+				//$(listBody).prepend(listTags);
+			}else{
+				listTags +=`
+					<tr>
+						<td colspan="8" style="text-align: center;">강의중인 내역이 없습니다.</td>
+					</tr>
+				`;
+				$(pagingArea).empty();
+			}
+			$("#listBody").html(listTags);
+			
+		},
+		error : function(xhr){
+			console.log(xhr.status);
+		}
+	});
+
+	let data = $("#searchForm").serialize();
+	$.getJSON(`/professor/ajax/lectureList?${data}`, function(resp){   // 요청 URL 설정 controller에 정해놓은거
+		let lectureList = resp.paging.dataList;
+		
+		let lectureTags = null;
+		if(lectureList.length > 0){
+			$.each(lectureList, function(idx, lecture){
+				lectureTags += makeTags(lecture);
+			});
+			$(pagingArea).html(resp.paging.pagingHTML);
+		}else{
+			lectureTags += `
+				<tr>
+					<td colspan="8" style="text-align: center;">강의중인 내역이 없습니다.</td>
+				</tr>
+			`;
+			$(pagingArea).empty();
+		}
+		$("#listBody").html(lectureTags);
+	});
+};
+
+*/
+
+$(function() {
+
+	function makeTags(lecture) {
+		let time = lecture.timetable;
+		let sem = lecture.semstrSe;
+		let year = sem.substr(0, 4);
+		let tdTags = "";
+		tdTags = `
+			<tr>
+				<td>
+				${year}년
+				</td>
+				<td>${lecture.semstrSeNm}</td>
+				<td>${lecture.course.courseNm}</td>
+				`;
+		if (lecture.bulNm != null || lecture.fcltsNm != null) {
+			tdTags += `<td>${lecture.buldNm} (${lecture.fcltsNm})</td>`;
+		} else {
+			tdTags += `<td>강의실 없음</td>`;
+		}
+		tdTags += `<td>`;
+		if (time.length == 0) {
+			tdTags += `시간표 없음`;
+		} else {
+			for (let i = 0; i < time.length; i++) {
+				tdTags += `${time[i].tmtbSe}`;
+			}
+		}
+		tdTags += `</td>`;
+		tdTags += `
+					<td>${lecture.lctreSe}</td>
+					<td>${lecture.complSe}</td>
+					<td>
+						<button type="button" id="modal_open" data-toggle="modal" 
+						data-target="#modal_open" class='btn btn-info'
+						data-lctre-no="${lecture.lctreNo}">
+						학생목록
+						</button>
+					</td> 
+			   </tr>
+			`;
+		return tdTags;
+	};
+
+
+	/*
+	리스트 불러오기
+	$("#searchCondition").on("submit", function(event){
+		event.preventDefault();
+
+		console.log("체킁2",this);
+		let data = $(this).serializeJSON();
+		//let json = JSON.stringify(data);
+
+		console.log("체킁:",json);
+
+		
+		$.ajax({
+			url:'/professor/lecture/ajax/lectureList',
+			method :"GET",
+			data: data,
+			type : "JSON",
+			success : function(rslt){
+	
+				console.log("체킁:",rslt);	
+
+				//let lectureList = rslt.lectureList;
+									
+				let listTags = null;
+				if (rslt.length > 0 ){
+					$.each(rslt, function(i,lecture){
+						listTags += 
+							makeTags(lecture);
+					});
+					$(listBody).prepend(listTags);
+				}else{
+					listTags +=`
+						<tr>
+							<td colspan="8" style="text-align: center;">강의중인 내역이 없습니다.</td>
+						</tr>
+					`;
+				}
+				$("#listBody").html(listTags);
+				
+			},
+			error : function(xhr){
+				console.log(xhr.status);
+			}
+		})
+		return false;
+	}).submit();
+	*/
+	// getList();
+
+	/* 
+	//검색 조건 
+	$("#searchUI").on("click", "#searchBtn", function(event) {
+		let select = $(this).parents("#searchUI").find("#searchSelect");
+			let selectName = select.attr("name");
+			let	selectValue = select.val();
+			
+		let inputs = $(this).parents("#searchUI").find("input[name=searchWord]");
+			let name = inputs.attr("name");
+			let value = inputs.val();
+		    
+			console.log("name , value 값 : ", name,value);
+			$("#searchForm").find(`:input[name=${name}]`).val(value);
+			$("#searchForm").find(`:input[name=${selectName}]`).val(selectValue);
+		    
+			console.log("name , value 값 : ", name,value,selectName,selectValue);
+			//getList();
+			$("#searchForm").submit();
+	});
+	*/
+
+	$("#searchForm").on("submit", function(event) {
+		event.preventDefault();
+		let data= $("#searchForm").serialize();
+		$.getJSON(`/professor/lecture/ajax/lectureList?${data}`, function(rslt) {
+			let lectureList = rslt.paging.dataList;
+			
+			let lectureTags = null;
+			if (lectureList.length > 0) {
+				$.each(lectureList, function(idx, lecture) {
+					lectureTags += makeTags(lecture);
+				});
+				$(pagingArea).html(rslt.paging.pagingHTML);
+			} else {
+				lectureTags += `
+					<tr>
+						<td colspan="8" style="text-align: center;">강의중인 내역이 없습니다.</td>
+					</tr>
+				`;
+				$(pagingArea).empty();
+			}
+			$("#listBody").html(lectureTags);
+		});
+		return false;
+	}).submit();
+
+
+	$("#searchUI").on("click", "#searchBtn", function(event) {
+
+		let selectName = $("#searchSelect").attr("name");
+		let selectValue = $("#searchSelect").val();
+		let inputs = $(this).parents("#searchUI").find("input[name=searchWord]");
+		let name = inputs.attr("name");
+		let value = inputs.val();
+
+		console.log("name , value 값 : ", name, value);
+		$(searchForm).find(`:input[name=${name}]`).val(value);
+		$(searchForm).find(`:input[name=${selectName}]`).val(selectValue);
+
+		console.log("name , value 값 : ", name, value, selectName, selectValue);
+		$("#searchForm").submit();
+		console.log("내려옴");
+		// let inputs = $(this).parents("#searchUI").find(":input[name]");
+		// $.each(inputs, function(idx, ipt){
+		//     let name = ipt.name;
+		//     let value = $(ipt).val();
+		//     $(searchForm).find(`:input[name=${name}]`).val(value);
+		//     });
+		//     $(searchForm).submit();
+	});
+
+	$("#modal_open").on("show.bs.modal", function(event) {
+		let $modal = $(this);
+		let tdTags = event.relatedTarget;
+		let lctreNo = $(tdTags).data("lctreNo");
+
+		console.log("lctreNo : ", lctreNo);
+
+		let url = "/professor/lecture/ajax/lectureStudentListView?lctreNo="+lctreNo;
+
+		$.get(url).done(function(rslt) {
+
+			$modal.find(".modal-body").html(rslt);
+			console.log("rslt 돌아온 값 : ", rslt);
+		});
+
+	}).on("hidden.bs.modal", function(event) {
+		$(this).find(".modal-body").empty();
+	});
+
+});
+
+function fn_paging(page) {
+	searchForm.page.value = page;
+	searchForm.requestSubmit();
+	searchForm.page.value = "";
+};

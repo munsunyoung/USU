@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.usu.tuition.mapper.StaffTuitionPayMapper">
+
+
+	<resultMap type="kr.ac.usu.tuition.vo.TuitionVO" id="listMap" autoMapping="true">
+		<association property="student" javaType="kr.ac.usu.user.vo.StudentVO" autoMapping="true">
+			<association property="subject" javaType="kr.ac.usu.subject.vo.SubjectVO" autoMapping="true">
+				<association property="college" javaType="kr.ac.usu.facilities.vo.CollegeVO" autoMapping="true"/>
+			</association>
+		</association>
+	</resultMap>
+	
+	
+
+	<sql id="searchFrag">
+		<where>
+	    	<if test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	    		<choose>
+	    			<when test="simpleCondition.searchType eq 'stdntNm'">
+	    				INSTR(STDNT_NM, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<when test="simpleCondition.searchType eq 'stdntNo'">
+	    				INSTR(STDNT_NO, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<when test="simpleCondition.searchType eq 'tutnPay'">
+	    				INSTR(TUTN_PAY, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<otherwise>
+	    				INSTR(STDNT_NM, #{simpleCondition.searchWord}) > 0
+	    				OR
+	    				INSTR(STDNT_NO, #{simpleCondition.searchWord}) > 0
+	    				OR
+	    				INSTR(TUTN_PAY, #{simpleCondition.searchWord}) > 0
+	    			</otherwise>
+	    		</choose>
+	    	</if>
+	    </where>
+	</sql>
+	
+	<sql id="listFromFrag">
+		SELECT
+		    a.tutn_nht_no
+		    , substr(a.semstr_no,1,4) tutn_pay_yr
+		    , substr(a.semstr_no,5,1) tutn_pay_sems
+		    , a.stdnt_no
+		    , c.stdnt_nm
+		    , e.subjct_nm sknrg_sttus_major1
+		    , CASE WHEN a.tutn_payde IS NOT NULL THEN '여' ELSE '부' END AS tutn_pay
+		FROM
+		    tuition a INNER JOIN student b on (a.stdnt_no = b.stdnt_no)
+		    INNER JOIN student_information c on (b.stdnt_no = c.stdnt_no)
+		    INNER JOIN school_register_status d on (b.stdnt_no = d.stdnt_no)
+		    INNER JOIN subject e on (d.sknrg_sttus_major1 = e.subjct_no)
+		ORDER BY
+		    tutn_pay_yr desc, tutn_pay_sems desc, tutn_pay desc
+	</sql>
+	
+	<!-- 납부여부 리스트 불러오기 -->
+	<select id="selectTotalRecord" resultType="int" parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM
+			(<include refid="listFromFrag" />)
+		<include refid="searchFrag" />
+	</select>
+	
+	<select id="selectTuitionList" resultMap="listMap" parameterType="string">
+		SELECT A.*
+		FROM (
+			SELECT ROWNUM RNUM, B.*
+			FROM(
+				<include refid="listFromFrag" />
+			) B
+			<include refid="searchFrag" />
+		) A
+		<![CDATA[
+	    WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+	    ]]>
+	</select>
+	
+	<select id="selectTuitionInfo" resultMap="listMap" parameterType="string">
+		SELECT
+		    a.tutn_nht_no
+		    , substr(a.semstr_no,1,4) tutn_pay_yr
+		    , substr(a.semstr_no,5,1) tutn_pay_sems
+		    , a.stdnt_no
+		    , c.stdnt_nm
+		    , e.subjct_nm sknrg_sttus_major1
+		    , CASE WHEN a.tutn_payde IS NOT NULL THEN '여' ELSE '부' END AS tutn_pay
+            , f.clg_nm
+            , a.tutn_etrncf
+            , a.tutn_tutfee
+            , a.tutn_schlship
+            , TO_CHAR(TO_DATE(a.tutn_payde)) tutn_payde
+		FROM
+		    tuition a INNER JOIN student b on (a.stdnt_no = b.stdnt_no)
+		    INNER JOIN student_information c on (b.stdnt_no = c.stdnt_no)
+		    INNER JOIN school_register_status d on (b.stdnt_no = d.stdnt_no)
+		    INNER JOIN subject e on (d.sknrg_sttus_major1 = e.subjct_no)
+            INNER JOIN college f on (e.clg_no = f.clg_no)
+        WHERE
+            a.tutn_nht_no = #{tutnNhtNo}
+	</select>
+	
+	<update id="updateTuitionInfo" parameterType="kr.ac.usu.tuition.vo.TuitionVO">
+		UPDATE
+		    tuition
+		SET
+		    tutn_etrncf = #{tutnEtrncf}
+		    , tutn_tutfee = #{tutnTutfee}
+		    , tutn_payde = REPLACE(#{tutnPayde},'-','')
+		WHERE
+		   tutn_nht_no = #{tutnNhtNo}
+	</update>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

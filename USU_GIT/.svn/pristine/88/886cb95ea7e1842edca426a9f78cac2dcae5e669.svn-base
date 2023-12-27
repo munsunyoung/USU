@@ -1,0 +1,58 @@
+package kr.ac.usu.classroom.service.impl;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.ac.usu.classroom.mapper.StudentClassRoomMapper;
+import kr.ac.usu.classroom.service.StudentClassroomService;
+import kr.ac.usu.classroom.vo.ClassroomBoardVO;
+import kr.ac.usu.classroom.vo.TestQuestionVO;
+import kr.ac.usu.classroom.vo.TestVO;
+import kr.ac.usu.lecture.vo.LectureVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class StudentClassRoomServiceImpl implements StudentClassroomService {
+
+	@Inject
+	private StudentClassRoomMapper mapper;
+	
+	@Override
+	public List<LectureVO> retrieveClassRoomList(String id, String semCd) {
+		Map<String, String> paramMap = new HashMap<String, String>();
+		paramMap.put("id", id);
+		paramMap.put("semCd", semCd);
+		return mapper.selectClassRoomList(paramMap);
+	}
+
+	@Override
+	public List<ClassroomBoardVO> retrieveHomeWorkList(String id, String semCd, String lctreNo) {
+		Map<String, String> paramMap = new HashMap<String, String>();
+		paramMap.put("id", id);
+		paramMap.put("semCd", semCd);
+		paramMap.put("lctreNo", lctreNo);
+		return mapper.selectHomeWorkList(paramMap);
+	}
+
+	@Override
+	public List<TestQuestionVO> retrieveTestQuestionList(String id, String semCd, String lctreNo) {
+		Map<String, String> paramMap = new HashMap<String, String>();
+		paramMap.put("id", id);
+		paramMap.put("semCd", semCd);
+		paramMap.put("lctreNo", lctreNo);
+		return mapper.selectTestQuestionList(paramMap);
+	}
+
+	@Override
+	public TestQuestionVO retrieveTestQuestion(TestVO test) {
+		TestQuestionVO testQuestion = mapper.selectTestQuestion(test);
+		testQuestion.setAtchFile(mapper.selectAttatchingFileList(testQuestion.getAtchFileNo()).get(0));
+		return testQuestion;
+	}
+}

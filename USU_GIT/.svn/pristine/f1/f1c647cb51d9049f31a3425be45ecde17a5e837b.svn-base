@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.usu.student.mapper.StaffGraduationMapper">
+
+	<resultMap type="kr.ac.usu.user.vo.GraduationVO" id="grdMap" autoMapping="true">
+		<id property="grdtnNo" column="GRDTN_NO"/>
+		<association property="student" javaType="kr.ac.usu.user.vo.StudentVO" autoMapping="true">
+			<association property="subject" autoMapping="true" />
+		</association>
+	</resultMap>
+	
+	<sql id="searchFrag">
+		<where>
+	    	<if test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	    		<choose>
+	    			<when test="simpleCondition.searchType eq 'stdntNm'">
+	    				INSTR(STDNT_NM, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<when test="simpleCondition.searchType eq 'stdntNo'">
+	    				INSTR(STDNT_NO, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<when test="simpleCondition.searchType eq 'sknrgSttusMajor1'">
+	    				INSTR(SUBJCT_NM, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<otherwise>
+	    				INSTR(STDNT_NM, #{simpleCondition.searchWord}) > 0
+	    				OR
+	    				INSTR(STDNT_NO, #{simpleCondition.searchWord}) > 0
+	    				OR
+	    				INSTR(SUBJCT_NM, #{simpleCondition.searchWord}) > 0
+	    			</otherwise>
+	    		</choose>
+	    	</if>
+	    </where>
+	</sql>
+	
+	<sql id="fromFrag">
+		SELECT
+            A.STDNT_NO
+            , B.STDNT_NM
+            , C.SUBJCT_NM
+            , TO_CHAR(TO_DATE(D.SKNRG_STTUS_ENTSCH,'YY/MM/DD'),'YY/MM/DD') SKNRG_STTUS_ENTSCH
+            , TO_CHAR(TO_DATE(D.SKNRG_STTUS_GRDTN,'YY/MM/DD'),'YY/MM/DD') SKNRG_STTUS_GRDTN
+        FROM
+            STUDENT A INNER JOIN STUDENT_INFORMATION B ON(A.STDNT_NO = B.STDNT_NO)
+            INNER JOIN SCHOOL_REGISTER_STATUS D ON(D.STDNT_NO = A.STDNT_NO)
+            INNER JOIN SUBJECT C ON (D.SKNRG_STTUS_MAJOR1 = C.SUBJCT_NO)
+        WHERE
+            D.SKNRG_STTUS_GRDTN IS NOT NULL
+	</sql>
+	
+	<select id="selectTotalRecord" resultType="int" parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM
+		(<include refid="fromFrag" />)
+			
+		<include refid="searchFrag" />
+	</select>
+	
+	<select id="selectGraduationList" resultType="kr.ac.usu.user.vo.GraduationVO" parameterType="kr.ac.usu.paging.vo.PaginationInfo" resultMap="grdMap">
+		SELECT A.*
+		FROM (
+			SELECT ROWNUM RNUM, B.*
+			FROM(
+				<include refid="fromFrag" />
+				) B
+			<include refid="searchFrag" />
+		) A
+		<![CDATA[
+	    WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+	    ]]>
+	</select>
+
+</mapper>

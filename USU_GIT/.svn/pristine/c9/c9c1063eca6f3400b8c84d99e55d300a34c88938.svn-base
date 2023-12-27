@@ -1,0 +1,27 @@
+package kr.ac.usu.lecture.mapper;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.ac.usu.lecture.vo.LectureVO;
+import kr.ac.usu.lecture.vo.StudentAttendanceLectureVO;
+import kr.ac.usu.paging.vo.PaginationInfo;
+
+@Mapper
+public interface StudentAttendanceLectureMapper {
+	
+	public int selectRequestablePoint(Map<String,String> paramMap);
+	public LectureVO selectRequestableLectureInfo(String lctreNo);
+	
+	public int selectRequestableLectureListTotalCount(PaginationInfo<LectureVO> paging);
+	public List<LectureVO> selectRequestableLectureList(PaginationInfo<LectureVO> paging);
+	
+	
+	public int insertAttendanceLecture(StudentAttendanceLectureVO attendance);
+	public int insertAttendanceLectureTimeTable(StudentAttendanceLectureVO attendance);
+	
+	public int deleteAttendanceLecture(StudentAttendanceLectureVO attendance);
+	public int deleteAttendanceLectureTimeTable(StudentAttendanceLectureVO attendance);
+}

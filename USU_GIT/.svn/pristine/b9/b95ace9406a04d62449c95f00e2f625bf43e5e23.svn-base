@@ -1,0 +1,66 @@
+package kr.ac.usu.score.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.ac.usu.classroom.controller.ProfessorClassroomController;
+import kr.ac.usu.classroom.service.ProfessorClassroomService;
+import kr.ac.usu.common.mapper.CommonOptionsMapper;
+import kr.ac.usu.lecture.vo.LectureVO;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * 
+ * @author PC-21
+ *
+ * @author 김재성
+ * @since 2023. 12. 02.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet 
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ *   수정일          수정자           수정내용
+ * ----------     --------    ----------------------
+ * 2023.12.02.      김재성      최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Slf4j
+@Controller
+@RequestMapping("/professor/score")
+public class ProfessorScoreController {
+
+	@Inject
+	private ProfessorClassroomService service;
+	
+	@Inject
+	private CommonOptionsMapper commonMapper;
+	
+	@Value("#{appInfo.saveFolederForApplicationKJS}")
+	private Resource saveFolderResource;
+	
+	//클래스룸 베이스 UI
+	@GetMapping("/scoreBaseUI")
+	public String classroomBaseUI(
+			Model model
+			,Authentication principal
+	) {
+		String prfsorNo = principal.getName();
+		List<LectureVO> lectureList =service.retrieveClassroomProfessorLecture(prfsorNo);
+		
+		log.info("클래스룸 메뉴 클릭시 가져오는 강의관련 데이터 : {}",lectureList);
+		
+		model.addAttribute("lectureList",lectureList);
+		
+		return "professor/score/professorScoreBaseUI";
+	}
+}

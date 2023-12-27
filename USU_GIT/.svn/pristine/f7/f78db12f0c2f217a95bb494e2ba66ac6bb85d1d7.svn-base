@@ -1,0 +1,151 @@
+/**
+ * <pre>
+ * 
+ * </pre>
+ * @author 김원희
+ * @since 2023. 11. 15.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일        수정자       수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 20.      김원희       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+
+// 전역변수 리스트
+// html 페이지의 id를 직접 가져다 쓰는 것은 짧은 샘플코드 작성시에만!
+// 규모가 큰 프로젝트에서는 유지/보수 하는 사람이 id인지 변수인지 구분하기가 어려워짐(가독성 나빠짐)
+
+
+
+
+
+const pagingArea = document.querySelector("#pagingArea");
+  
+// 전역함수
+     function makeTrTag(consultation){
+			
+		let trTag = `
+            <tr data-consult-no="${consultation.cnsltNo}">
+                <td>${consultation.cnsltRequstCn}</td>
+                <td>${consultation.cnsltRequstDate}</td>
+				<td >${consultation.cnsltRequstTime}</td>
+           
+        `;
+
+		if(consultation.cnsltRequstProcess=="01"){
+			trTag += `<td><span class="pstatus01">${consultation.complSe}</span></td></tr>`;
+		}else if(consultation.cnsltRequstProcess=="02"){
+			trTag += `<td><span class="pstatus02">${consultation.complSe}</span></td></tr>`;
+		}else{
+			trTag += `<td><span class="pstatus03">${consultation.complSe}</span></td></tr>`;
+		}
+        return trTag;
+    };
+
+
+
+
+
+
+
+// 아작스 리스트 요청 함수
+function getList(){
+    // 처음엔 디버깅이 편하도록 필요한 값이 다 눈에 들어오겡,
+    // 리팩토링(정리)은 기능 구현이 끝나면...
+
+    // 서버에 보낼 데이타
+    let sendData = {
+        searchType:"이름" ,
+        searchWord:"원희",
+        currentPage: 1
+    }
+
+    $.ajax({
+        type:"get",
+        url:"/student/consulting/ajax/studentConsultationList",
+        async:true,
+        data:sendData,
+        dataType:"json",  // JSON.parse("JSON형식의 문자열") => 자바스크립트객체가됨({}나 [])
+        success:function(resp){
+            console.log("서버가 준값",resp); // 항상 눈으로 확인
+            let consultingList = resp.dataList;
+            let trTags = null;
+            if(consultingList.length > 0){
+                $.each(consultingList, function(idx, consultation){
+                    trTags += makeTrTag(consultation);
+                });
+                $(pagingArea).html(resp.pagingHTML);
+            }else{
+                trTags += `
+                    <tr>
+                    	<td colspan="5" style="text-align: center;">등록된 상담이 없습니다.</td>
+                    </tr>
+                `;
+                $(pagingArea).empty();
+            }
+            $("#listBody").html(trTags);
+        },
+        error:function(xhr){
+            console.log("Error",xhr.status);
+        }
+    })
+}
+
+ $(function(){
+	 
+    getList(); // 함수 콜/실행
+    
+    //------------------------------------------------------------------------------------------------
+
+    /*
+	$("#searchForm").on("submit", function(event){
+        event.preventDefault();
+        let data = $(this).serialize();
+        $.getJSON(`/student/consulting/ajax/studentConsultationList?${data}`, function(resp){
+
+            let consultingList = resp.paging.dataList;
+            let trTags = null;
+            if(consultingList.length > 0){
+                $.each(consultingList, function(idx, consultation){
+                    trTags += makeTrTag(consultation);
+                });
+                $(pagingArea).html(resp.paging.pagingHTML);
+            }else{
+                trTags += `
+                    <tr>
+                    	<td colspan="5" style="text-align: center;">등록된 상담이 없습니다.</td>
+                    </tr>
+                `;
+                $(pagingArea).empty();
+            }
+            $("#listBody").html(trTags);
+        });
+       return false;
+    }).submit();
+    */
+     //------------------------------------------------------------------------------------------------
+	
+    $("#searchUI").on("click", "#searchBtn", function(event){
+        let inputs = $(this).parents("#searchUI").find(":input[name]");
+        $.each(inputs, function(idx, ipt){
+            let name = ipt.name;
+            let value = $(ipt).val();
+            $(searchForm).find(`:input[name=${name}]`).val(value);
+            });
+            $(searchForm).submit();
+    });
+        
+    //------------------------------------------------------------------------------------------------
+        
+   
+	
+        
+});
+function fn_paging(page){
+    searchForm.page.value = page;
+    searchForm.requestSubmit();
+    searchForm.page.value = "";
+}

@@ -1,0 +1,43 @@
+package kr.ac.usu.lecture.mapper;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.ac.usu.lecture.vo.LectureVO;
+import kr.ac.usu.paging.vo.PaginationInfo;
+
+/**
+ * 
+ * @author PC-25
+ *
+ * @author 이재혁
+ * @since 2023. 11. 7.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet 
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일          수정자               수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 7.   이재혁       최초작성
+ * 2023. 11.11.   김재성       강의리스트 dao 생성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Mapper
+public interface ProfessorLectureMapper {
+	
+	/**
+	 * 한 교수의 강의중인 내역 리스트에 총 레코드 수
+	 * @param paging
+	 * @return 총 레코드수 totalPage
+	 */
+	public int selectTotalRecord(PaginationInfo<LectureVO> paging);
+	
+	/**
+	 * 한 교수의 강의중인 내역 리스트와 페이징처리
+	 * @param paging
+	 * @return DataList, paging
+	 */
+	public List<LectureVO> SelectLectureList(PaginationInfo<LectureVO> paging);
+}

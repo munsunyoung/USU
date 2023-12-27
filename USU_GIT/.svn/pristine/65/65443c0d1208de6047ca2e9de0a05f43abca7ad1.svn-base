@@ -1,0 +1,48 @@
+package kr.ac.usu.classroom.service.impl;
+
+import org.springframework.stereotype.Service;
+
+import kr.ac.usu.classroom.service.ProfessorClassroomTestService;
+import kr.ac.usu.classroom.vo.TestAnswerVO;
+import kr.ac.usu.classroom.vo.TestQuestionVO;
+import kr.ac.usu.classroom.vo.TestVO;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * @author PC-21
+ *
+ * @author 김재성
+ * @since 2023. 11. 27.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet 
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 	수정일            수정자            수정내용
+ * ----------     --------    ----------------------
+ * 2023.11.27.      김재성       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Slf4j
+@Service
+public class ProfessorClassroomTestServiceImpl implements ProfessorClassroomTestService{   
+	@Override
+	public int creativeTest(TestVO test) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+		
+	@Override
+	public int creativeClassroomTestQuest(TestQuestionVO testQeust) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int creativeTestAnswerPaper(TestAnswerVO testAnwser) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+}

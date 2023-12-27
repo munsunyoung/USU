@@ -1,0 +1,304 @@
+/**
+ * </pre>
+ * @author 김재성
+ * @since 2023. 12. 04.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ *  수정일         수정자       수정내용
+ * --------     ------    ----------------
+ * 2023.12.04.   김재성     최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+$(function() {
+	
+	let selectLctreNo = $("#scoreLectureChoiceSelect").val();
+	
+	// 탭 변환
+	$('.class_list_wrap button').click(function () {
+        var tab_id = $(this).attr('data-tab');
+		
+        $('.class_list_wrap button').removeClass('active');
+        $('.tab-content').removeClass('current');
+		
+        $(this).addClass('active');
+		
+        $("#" + tab_id + '-content').addClass('current');
+    });
+
+	$("#scoreLectureChoiceSelect").on("change",function(e){
+		e.preventDefault();
+		let selectLecture = $(this).val();
+		
+		console.log("scoreObjection 선택된 강의 번호 : ",selectLecture);
+		
+		// 성적이의신청 리스트
+		$.ajax({
+            type:"get",
+            url:`/professor/score/scoreObjectionList/${selectLecture}`,
+            dataType:"html",	
+            //async:false,    // 틀이 들어가야 데이타를 넣을 수 있으므로
+            success: function(rslt){
+                $("#scoreObjectionBody").html(rslt); 
+            },
+            error: function(xhr){
+                console.log(xhr.status);
+            }
+        });
+		
+		//성적등록 수강학생 리스트
+		$.ajax({
+            type:"get",
+            url:`/professor/score/scoreRegistrationList/${selectLecture}`,
+            dataType:"html",	
+            //async:false,    // 틀이 들어가야 데이타를 넣을 수 있으므로
+            success: function(rslt){
+                $("#scoreRegistrationBody").html(rslt); 
+            },
+            error: function(xhr){
+                console.log(xhr.status);
+            }
+        });
+	});
+	
+   	// 성적이의신청 모달 ------------------------------------------------
+	$(document).on("click",".scoreObjectionDetail", function() {
+		
+	    let stdntNo = $(this).data("stdntNo");
+		let lctreNo = $(this).data("lctreNo");
+		console.log("학생번호 왜 안올까 확인 : ",stdntNo);
+		
+		$.ajax({
+            type:"get",
+            url:`/professor/score/scoreObjectionDetailView/${lctreNo}/${stdntNo}`,
+            dataType:"html",	
+            //async:false,    // 틀이 들어가야 데이타를 넣을 수 있으므로
+            success: function(rslt){
+                $(".scoreObjectionInfoViewModalbody").html(rslt); 
+            },
+            error: function(xhr){
+                console.log(xhr.status);
+            }
+        });
+
+		$("#scoreObjectionInfoViewModal").modal('show');
+		
+	});
+	
+	// 모달 닫는 함수
+	$("#scoreObjectionInfoViewModalClose").click(function(){
+	    $("#scoreObjectionInfoViewModal").modal('hide');
+	});
+	
+	$("#reSetScoreObjectionModalClose").click(function(){
+	    $("#reSetScoreObjectionModal").modal('hide');
+	});
+	
+	$("#refuseScoreObjectionModal").click(function(){
+	    $("#refuseScoreObjectionModal").modal('hide');
+	});
+	
+	$("#scoreRegistrationModalClose").click(function(){
+	    $("#scoreRegistrationModalClose").modal('hide');
+	});
+	
+	//성적이의신청 반려 업데이트
+	$(document).on("submit","#refuseScoreObjectionForm", function(event){
+        event.preventDefault();
+		
+		let content = $("#refuseScoreObjectionContent").val();
+		
+		console.log("반려사유 값이 오는지 안오는지 확인 : ",content);
+		
+		$("#scoreObjcReturnTextArea").val(content);
+		
+		if(!content){
+			//alert("반려사유를 입력해주세요.");
+			Swal.fire({
+			  icon: "success",
+			  title: "반려사유를 입력해주세요.",
+			  showConfirmButton: false,
+			  timer: 1500
+			});
+			return false;
+		}
+		
+        let data = $(this).serialize();
+		let settings = {
+			url : "/professor/score/modifyRefuseScoreObjection"
+			, method : "POST"
+			, data : data
+			, dataType : 'json'
+			, success : function(resp){
+
+				if(resp.success){
+					//alert(resp.message);
+					Swal.fire({
+					  icon: "success",
+					  title: resp.message,
+					  showConfirmButton: false,
+					  timer: 1500
+					});
+					
+					location.reload();
+				}else{
+					alert(resp.message);
+				}
+			}
+			, error : function(xhr, status, err){
+				console.log(err);
+					alert("잘못된 요청 발생!",xhr.status);
+			}
+		};
+		$.ajax(settings);
+
+	});
+	
+	// 성적이의신청 정정 업데이트
+	$(document).on("submit","#resetScoreObjectionForm", function(event){
+        event.preventDefault();
+		
+		let content = $("#resetScoreTextArea").val();
+		
+		console.log("반려사유 값이 오는지 안오는지 확인 : ",content);
+		
+		$("#resetScoreObjectionContent").val(content);
+		
+		if(!content){
+			//alert("반려사유를 입력해주세요.");
+			Swal.fire({
+			  icon: "success",
+			  title: "반려사유를 입력해주세요.",
+			  showConfirmButton: false,
+			  timer: 3000
+			});
+			return false;
+		}
+		
+        let data = $(this).serialize();
+		let settings = {
+			url : "/professor/score/modifyResetScoreObjection"
+			, method : "POST"
+			, data : data
+			, dataType : 'json'
+			, success : function(resp){
+
+				if(resp.success){
+					//alert(resp.message);
+					Swal.fire({
+					  icon: "success",
+					  title: resp.message,
+					  showConfirmButton: false,
+					  timer: 3000
+					});
+					
+					location.reload();
+				}else{
+					alert(resp.message);
+				}
+			}
+			, error : function(xhr, status, err){
+				console.log(err);
+					alert("잘못된 요청 발생!",xhr.status);
+			}
+		};
+		$.ajax(settings);
+
+	});
+	
+	
+	// 성적등록 모달 ------------------------------------------------
+	$(document).on("click",".scoreRegistration", function() {
+		
+	    let stdntNo = $(this).data("stdntNo");
+		let lctreNo = $(this).data("lctreNo");
+		console.log("학생번호 왜 안올까 확인 : ",stdntNo);
+		
+		$.ajax({
+            type:"get",
+            url:`/professor/score/scoreRegistrationView/${lctreNo}/${stdntNo}`,
+            dataType:"json",	
+            //async:false,    // 틀이 들어가야 데이타를 넣을 수 있으므로
+            success: function(rslt){
+				let evlList = rslt.lctreEvlStdrList;
+				
+				let lctreNo = rslt.lctreNo;
+				let stdntNo = rslt.stdntNo;
+				
+				$("#scoreRegistLctreNo").val(lctreNo);
+				$("#scoreRegistStdntNo").val(stdntNo);
+				
+				console.log("혹시나 오는지 확인 해보기  : ",rslt.stdntNo);
+				console.log("혹시나 오는지 확인 해보기  : ",rslt.lctreNo);
+				
+				console.log("evlList : ",evlList);
+				
+				let trTag = `<tr>`;
+				if(evlList.length > 0){
+	                $.each(evlList, function(idx,evlList){
+							
+						trTag += `
+								<th>${evlList.scoreSe}</th>
+								<td>${evlList.lctreEvlStdrReflct} %</td>
+						`;
+					});
+				 trTag += `</tr>`;	
+				}else{
+	                trTag += `
+	                    <tr>
+	                    	<td colspan="2" style="text-align: center;">평가기준이 없습니다.</td>
+	                    </tr>
+	                `;
+				}
+				$("#lectureEvalutionStandardBody").html(trTag); 
+            },
+            error: function(xhr){
+                console.log(xhr.status);
+            }
+        });
+		
+	});
+	
+	// 성적 등록
+	$(document).on("submit","#scoreRegistrationForm", function(event){
+        event.preventDefault();
+		
+		let lctreNo = $("#scoreRegistLctreNo").val();
+		let stdntNo = $("#scoreRegistStdntNo").val();
+		
+		console.log("혹시나 오는지 확인 해보기  : ",stdntNo);
+		console.log("혹시나 오는지 확인 해보기  : ",lctreNo);
+				
+        let data = $(this).serialize();
+		let settings = {
+			url : "/professor/score/scoreRegistration"
+			, method : "POST"
+			, data : data
+			, dataType : 'json'
+			, success : function(resp){
+
+				if(resp.success){
+					//alert(resp.message);
+					Swal.fire({
+					  icon: "success",
+					  title: resp.message,
+					  showConfirmButton: false,
+					  timer: 3000
+					});
+					
+					location.reload();
+				}else{
+					alert(resp.message);
+				}
+			}
+			, error : function(xhr, status, err){
+				console.log(err);
+					alert("잘못된 요청 발생!",xhr.status);
+			}
+		};
+		$.ajax(settings);
+
+	});
+	
+});

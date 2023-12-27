@@ -1,0 +1,76 @@
+/**
+ * </pre>
+ * @author 김재성
+ * @since 2023. 12. 04.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ *  수정일         수정자       수정내용
+ * --------     ------    ----------------
+ * 2023.12.04.   김재성     최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+$(function() {
+	
+	let selectLctreNo = $("#scoreLectureChoiceSelect").val();
+	
+	// 탭 변환
+	$('.class_list_wrap button').click(function () {
+        var tab_id = $(this).attr('data-tab');
+		
+        $('.class_list_wrap button').removeClass('active');
+        $('.tab-content').removeClass('current');
+		
+        $(this).addClass('active');
+		
+        $("#" + tab_id + '-content').addClass('current');
+    });
+
+	$("#scoreLectureChoiceSelect").on("change",function(e){
+		e.preventDefault();
+		let selectLecture = $(this).val();
+		
+		console.log("scoreObjection 선택된 강의 번호 : ",selectLecture);
+		
+		
+		$.ajax({
+            type:"get",
+            url:`/professor/score/scoreObjectionList/${selectLecture}`,
+            dataType:"html",	
+            //async:false,    // 틀이 들어가야 데이타를 넣을 수 있으므로
+            success: function(rslt){
+                $("#scoreObjectionBody").html(rslt); 
+            },
+            error: function(xhr){
+                console.log(xhr.status);
+            }
+        });
+	});
+	
+   	// 성적이의신청 모달 ------------------------------------------------
+	$(document).on("click",".scoreObjectionInfoView", function() {
+		
+	    let stdntNo = $(this).data("stdntNo");
+		
+		$.ajax({
+            type:"get",
+            url:`/professor/score/scoreObjectionDetailView/${selectLctreNo}/${stdntNo}`,
+            dataType:"html",	
+            //async:false,    // 틀이 들어가야 데이타를 넣을 수 있으므로
+            success: function(rslt){
+                $(".scoreObjectionInfoViewModalbody").html(rslt); 
+            },
+            error: function(xhr){
+                console.log(xhr.status);
+            }
+        });
+
+		$("#scoreObjectionInfoViewModal").modal('show');
+		
+	});
+	
+	$("#scoreObjectionInfoViewModalClose").click(function(){
+	    $("#scoreObjectionInfoViewModal").modal('hide');
+	});
+});

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.usu.lecture.mapper.LectureLectureMapper">
+	
+	<!-- 현재 강의중인 교수목록 -->
+	<resultMap type="kr.ac.usu.lecture.vo.LectureVO" id="lectureMap" autoMapping="true">
+		<id property="lctreNo" column="LCTRE_NO"/>
+		<association property="facilities" javaType="kr.ac.usu.facilities.vo.FacilitiesVO" autoMapping="true" >
+			<association property="building" javaType="kr.ac.usu.facilities.vo.BuildingVO" autoMapping="true" />
+		</association>
+		<association property="course" javaType="kr.ac.usu.course.vo.CourseVO" autoMapping="true" />
+		<collection property="timetable" ofType="kr.ac.usu.lecture.vo.LectureTimetableVO" autoMapping="true"/>
+	</resultMap>
+	<select id="selectLectureList" parameterType="kr.ac.usu.user.vo.SearchConditionVO" resultMap="lectureMap">
+	
+        WITH
+        LCTREVIEW AS (
+					SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC015'
+				 ),
+         SEMSTRVIEW AS (
+					SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC018'
+				 ),
+         COMPLVIEW AS (
+                SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC014'
+         ),
+          FACILITIESVIEW AS (
+				 	SELECT 
+				 		FCLTS_NO,
+				 		FCLTS_NM,
+						F.BULD_NO,
+						PRFSOR_NO,
+						BULD_NM,
+						CLG_NO
+					FROM 
+						FACILITIES F
+						INNER JOIN BUILDING B ON (F.BULD_NO = B.BULD_NO)
+        ),
+        TMTBVIEW AS (
+					SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC011'
+				 )
+			SELECT
+				L.LCTRE_NO,
+				LCTRE_NMPR,
+				L.FCLTS_NO,
+				L.PRFSOR_NO,
+				S.COM_CODE_NM SEMSTR_SE,
+				L.COURSE_NO,
+                C.COM_CODE_NM LCTRE_SE,
+                O.COM_CODE_NM COMPL_SE,
+                BULD_NM,
+                FCLTS_NM,
+                COURSE_NM,
+                T.COM_CODE_NM TMTB_SE
+                
+			FROM
+				LECTURE L
+                   LEFT OUTER JOIN LCTREVIEW C ON (C.COM_CODE = L.LCTRE_SE)
+                   LEFT OUTER JOIN SEMSTRVIEW S ON (S.COM_CODE = L.LCTRE_SE)
+                   LEFT OUTER JOIN COMPLVIEW O ON (O.COM_CODE = L.LCTRE_SE)
+                   LEFT OUTER JOIN FACILITIESVIEW F ON (L.FCLTS_NO = F.FCLTS_NO)
+                   INNER JOIN COURSE U ON (L.COURSE_NO = U.COURSE_NO)
+                   LEFT OUTER JOIN LECTURE_TIMETABLE V ON (L.LCTRE_NO = V.LCTRE_NO)
+                   LEFT OUTER JOIN TMTBVIEW T ON (V.TMTB_SE = T.COM_CODE)
+					
+			WHERE L.PRFSOR_NO=#{userId}
+			<if test="year neq null">
+				 AND SUBSTR(L.LCTRE_NO,5,2) = SUBSTR(#{year},3,2)
+			</if>
+			<if test="semstrNo neq null">
+				 AND SUBSTR(L.LCTRE_NO,7,1) = #{semstrNo}
+			</if>
+	</select>
+</mapper>

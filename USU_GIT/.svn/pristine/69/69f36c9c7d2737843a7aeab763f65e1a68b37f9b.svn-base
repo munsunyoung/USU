@@ -1,0 +1,71 @@
+package kr.ac.usu.lecture.service.impl;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.ac.usu.course.vo.CourseVO;
+import kr.ac.usu.lecture.mapper.ProfessorLectureMapper;
+import kr.ac.usu.lecture.service.ProfessorLecturetService;
+import kr.ac.usu.lecture.vo.LectureVO;
+import kr.ac.usu.paging.vo.PaginationInfo;
+import kr.ac.usu.user.vo.SearchConditionVO;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * 
+ * @author PC-25
+ *
+ * @author 이재혁
+ * @since 2023. 11. 7.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet 
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일          수정자               수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 7.  이재혁        최초작성
+ * 2023. 11.10.  김재성        클래스타입 수정
+ * 2023. 11.13.  김재성        메소드 수정
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Slf4j
+@Service
+public class ProfessorLectureServiceImpl implements ProfessorLecturetService {
+	
+	@Inject
+	private ProfessorLectureMapper lectureMapper;
+	
+	// 강의목록
+	@Override
+	public List<LectureVO> retrieveLectureList(SearchConditionVO searchConditionVO) {
+		
+		log.info("체킁:{}",searchConditionVO);
+		   
+	    List<LectureVO>	 jsList = lectureMapper.selectLectureList(searchConditionVO);
+		log.info("jsList {}",jsList);
+	    
+		return jsList;
+	}
+	
+	// 교과목 내역
+	@Override
+	public void retrieveCourseList(PaginationInfo<CourseVO> paging) {
+		
+		log.info("교과목 내역 매개변수 : {}", paging);
+		
+		int totalRecord = lectureMapper.selectTotalRecord(paging);
+		paging.setTotalRecord(totalRecord);
+		
+		List<CourseVO> dataList = lectureMapper.selectCourseList(paging);
+		paging.setDataList(dataList);
+		
+		log.info("교과목 내역 리스트 : {}", dataList);
+	}
+
+
+	
+}

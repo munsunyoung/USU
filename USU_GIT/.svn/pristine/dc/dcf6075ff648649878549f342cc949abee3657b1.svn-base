@@ -1,0 +1,90 @@
+package kr.ac.usu.classroom.mapper;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.ac.usu.board.vo.AttatchingFileVO;
+import kr.ac.usu.classroom.vo.ClassroomBoardVO;
+import kr.ac.usu.classroom.vo.TestAnswerVO;
+import kr.ac.usu.classroom.vo.TestQuestionVO;
+import kr.ac.usu.classroom.vo.TestVO;
+import kr.ac.usu.lecture.vo.LectureVO;
+
+/**
+ * @author PC-21
+ *
+ * @author 김재성
+ * @since 2023. 11. 27.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet 
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 	수정일            수정자            수정내용
+ * ----------     --------    ----------------------
+ * 2023.11.27.      김재성       최초작성
+ * 2023.11.28.      김석호       개편
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Mapper
+public interface ProfessorClassroomMapper {
+	
+	/**
+	 * 교수가 강의중인 강의목록
+	 * @param lctreNo 교수번호
+	 * @return List<LectureVO> studentList
+	 */
+	public List<LectureVO> selectClassroomProfessorLecture(String prfsorNo);
+	
+	/**
+	 * 시험 파일 업로드
+	 * @param testFile
+	 * @return
+	 */
+	public int insertTestFile(AttatchingFileVO testFile);
+	
+	
+	/**
+	 * 교수가 강의중인 한 강의에 시험을 등록
+	 * @param test
+	 * @return
+	 */
+	public int insertTest(TestVO test);
+	
+	/**
+	 * 시험 등록, 파일등록 후 시험문제 테이블에 등록
+	 * @param testQuestion
+	 * @return
+	 */
+	public int insertTestQuestion(TestQuestionVO testQuestion);
+	
+	/**
+	 * 교수가 강의중인 한 강의에 시험 출제 등록
+	 * @param testQeust
+	 * @return 
+	 */
+	public int insertClassroomTestQuest(List<TestAnswerVO> testQeustList);
+
+	/**
+	 * 클래스룸에 등록하는 과제 , 자료 파일 업로드
+	 * @param atch
+	 */
+	public int insertClassRoomFile(AttatchingFileVO atch);
+	
+	/**
+	 * 교수가 클래스룸에서 시험,과제,자료 등록 통합 사용
+	 * @param classboard
+	 * @return
+	 */
+	public int insertClassRoomBoard(ClassroomBoardVO classboard);
+	
+	/**
+	 * 한 교수의 한 강의에 대한 시험출제 목록
+	 * @param prfsorNo
+	 * @return
+	 */
+	public List<TestQuestionVO> selectClassRoomTestList(TestQuestionVO testQuestionVO);
+	
+}

@@ -1,0 +1,128 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="security" %>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+<style>
+.fc-h-event{border:none !important;}
+.fc-daygrid-event{border-radius:0 !important;}
+.widget-left{display: inline; float: left !important;}
+.widget-right{display: inline; float: right !important;}
+.userName {font-size: 25px;}
+.widget_a:focus, .widget_a:hover{text-decoration: none; color: inherit;}
+.widget_a{color: inherit;}
+</style>    
+<div class="main_top_content_wrap" style="height: 107px;">
+	<security:authentication property="principal" var="user"/>
+	<div class="welcom_txt" style="margin-top:10px;"><span class="userName">${user.realUser.sklstfNm} </span>님 안녕하세요.</div>
+</div>
+			
+<!-- Begin Page Content -->
+<div class="container-fluid">
+	<div class="col-lg-6 mb-4">
+
+		<!-- Illustrations -->
+		<div class="card shadow mb-4 widget-left">
+			<!-- 학사일정 -->
+			<div>
+				<div class="card-header py-3">
+				    <h6 class="m-0 font-weight-bold text-primary">학사일정</h6>
+				</div>
+				<!-- 실제 화면을 담을 영역 -->
+				<div class="card-body">
+					<div id="Wrapper">
+						<div id='calendar'></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="card shadow mb-4 widget-right">
+			<div gs-id="mypage" id="moveToMypage" class="grid-stack-item-content">
+				<div class="card border-left-warning py-2" >
+					<div class="card-body">
+						<div class="row no-gutters align-items-center">
+							<div class="col mr-2">
+								<div class="text-xs font-weight-bold text-warning text-uppercase mb-1" style="margin-top: 5px;">
+									<span style="font-size: 20px;"><a class="widget_a" href="/staff/mypage/staff/myPageUI">마이페이지</a></span>
+								</div>
+								<div class="h5 mb-0 font-weight-bold text-gray-800"></div>
+							</div>
+							<div class="col-auto">
+								<i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+			
+		<div class="card shadow mb-4 widget-right">
+			<!-- 일반공지 -->
+			<div>
+				<div gs-id="comBoard" style="background-color: white;">
+					<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+						<h6 class="m-0 font-weight-bold text-primary">일반 공지</h6>
+						<a class="ft_right" href="/staff/staffCommonNoticeListUI">더보기</a>
+					</div>
+					<div class="card-body" style="padding-top:10px;">
+						<div class="chart-area" style="height: 200px;">
+							<table class="table table_style01 table_center" id="dataTable" width="100%" cellspacing="0">
+								<thead>
+									<colgroup> 
+										<col width="10%">
+					                 	<col width="50%">
+					                 	<col width="20%">
+					                 	<col width="10%">
+									</colgroup>
+									<tr>
+										<th>번호</th>
+										<th>제목</th>
+							            <th>작성일</th>
+							            <th>조회수</th>
+									</tr>
+								</thead>
+								<tbody id="comBoard-body"></tbody>                      
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>		
+		</div>
+		
+		<div class="card shadow mb-4 widget-right">
+			<div gs-id="noticeBoard" class="grid-stack-item-content" style="background-color: white;">
+				<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+					<h6 class="m-0 font-weight-bold text-primary">학사 공지</h6>
+					<a class="ft_right" href="/staff/staffNoticeListUI">더보기</a>
+				</div>
+				<div class="card-body" style="padding-top:10px;">
+					<div class="chart-area" style="height: 200px;">
+						<table class="table table_style01 table_center" id="dataTable" width="100%" cellspacing="0">
+							<thead>
+								<colgroup>
+									<col width="10%">
+				                 	<col width="50%">
+				                 	<col width="20%">
+				                 	<col width="10%">
+								</colgroup>
+								<tr>
+									<th>번호</th>
+									<th>제목</th>
+						            <th>작성일</th>
+						            <th>조회수</th>
+								</tr>
+							</thead>
+							<tbody id="noticeBoard-body"></tbody>                      
+						</table>
+					</div>
+				</div>			
+			</div>
+		</div>
+		
+	</div>
+</div>
+				<!-- /.container-fluid -->
+				
+				
+<script src="${pageContext.request.contextPath }/resources/js/app/kwh/staffMain.js"></script>
+
+				

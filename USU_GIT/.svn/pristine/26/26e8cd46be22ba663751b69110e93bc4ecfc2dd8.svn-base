@@ -1,0 +1,53 @@
+/**
+ * <pre>
+ * 수강신청 페이지에서 사용할 자바스크립트
+ * 민감한 파일이므로 터치 자제 부탁드립니다.
+ * </pre>
+ * @author 김석호
+ * @since 2023. 11. 17.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일       수정자       수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 17.      김석호       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */ 
+
+// onload function
+$(()=>{
+	//=======================================WEB SOCKET================================================
+	// 소켓 연결
+	attedanceSocket = new WebSocket(`ws://${SERVERSIDEADDRESS}/student/attendance`);
+	attedanceSocket.onopen = fOpen;
+	attedanceSocket.onmessage = fOnMessage;
+	//=================================================================================================
+})
+
+// ------------------------------------------------------ onload 밖에서 선언할 것들
+function fSend(data){
+	attedanceSocket.send(JSON.stringify(data));
+}
+function fOpen(){
+	let data = {command : "CONNECT" , lctreNo : null, message :"접속",stdntNo : currStdntNo}
+	fSend(data);
+}
+
+function makeMessage(command,lctreNo,message){
+	let data = {command : command, lctreNo : lctreNo,message : message,stdntNo : currStdntNo}
+	return data;
+} 
+
+function fOnMessage(event){
+	let message = event.data;
+	console.log(message);
+	let data = JSON.parse(message);
+	console.log(data)
+}
+function fClose(event){
+	attedanceSocket.close();
+}
+function fError(event){
+	console.log("웹소켓오류 : " , event);
+}

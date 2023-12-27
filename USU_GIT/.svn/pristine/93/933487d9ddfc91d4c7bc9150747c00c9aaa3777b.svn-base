@@ -1,0 +1,92 @@
+/**
+ * </pre>
+ * @author 김재성
+ * @since 2023. 11. 26.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ *  수정일         수정자       수정내용
+ * --------     ------    ----------------
+ * 2023.11.26.   김재성       최초작성
+ * 2023.11.27.   김재성       UI 메뉴 및 Form 재구성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+$(function() {
+	
+	
+	// 탭 변환
+	$('.class_list_wrap button').click(function () {
+        var tab_id = $(this).attr('data-tab');
+		
+        $('.class_list_wrap button').removeClass('active');
+        $('.tab-content').removeClass('current');
+		
+        $(this).addClass('active');
+		
+        $("#" + tab_id + '-content').addClass('current');
+    });
+
+	
+	$("#classroomLectureChoiceSelect").on("change",function(e){
+		e.preventDefault();
+		
+		let selectLecture = $(this).val();
+		$.ajax({
+            type:"get",
+            url:"/professor/classroom/test",
+            //data: {lctreNo : selectLecture},
+            dataType:"html",
+            //async:false,    // 틀이 들어가야 데이타를 넣을 수 있으므로
+            success: function(rslt){
+                $("#testBody").html(rslt); 
+            },
+            error: function(xhr){
+                console.log(xhr.status);
+            }
+        });
+
+        $.ajax({
+            type:"get",
+            url:`/professor/classroom/assignment/${selectLecture}`,
+            //data: {lctreNo : selectLecture},
+            dataType:"html",
+            //async:false,    // 틀이 들어가야 데이타를 넣을 수 있으므로
+            success: function(rslt){
+                $("#assignmentBody").html(rslt); 
+            },
+            error: function(xhr){
+                console.log(xhr.status);
+            }
+        });
+
+        $.ajax({
+            type:"get",
+            url:"/professor/classroom/data",
+            //data: {lctreNo : selectLecture},
+            dataType:"html",
+            //async:false,    // 틀이 들어가야 데이타를 넣을 수 있으므로
+            success: function(rslt){
+                $("#dataBody").html(rslt); 
+            },
+            error: function(xhr){
+                console.log(xhr.status);
+            }
+        });
+
+        $.ajax({
+            type:"get",
+            url:"/professor/classroom/onlineLecture",
+           // data: {lctreNo : selectLecture},
+            dataType:"html",
+            //async:false,    // 틀이 들어가야 데이타를 넣을 수 있으므로
+            success: function(rslt){
+                $("#lectureOnlineBody").html(rslt); 
+            },
+            error: function(xhr){
+                console.log(xhr.status);
+            }
+        });
+	});
+	
+});

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.usu.lecture.mapper.StudentAttendanceLectureMapper">
+	<resultMap type="kr.ac.usu.lecture.vo.LectureVO" id="lectureInfo">
+		<id property="lctreNo" column="LCTRE_NO" />
+		<association property="professor" javaType="kr.ac.usu.user.vo.ProfessorVO" autoMapping="true" />
+		<association property="facilities" javaType="kr.ac.usu.facilities.vo.FacilitiesVO" autoMapping="true" />
+		<association property="course" javaType="kr.ac.usu.course.vo.CourseVO" autoMapping="true" />
+	</resultMap>
+
+	<select id="selectRequestableLectureList" resultMap="lectureInfo" parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+		WITH COMMONVIEW as(
+    		SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC015'
+		),
+		TIMETABLEVIEW AS(
+		    SELECT LCTRE_NO
+		     , LISTAGG(CC.COM_CODE_NM, '/') WITHIN GROUP (ORDER BY COM_CODE_NM)
+		          OVER(PARTITION BY LCTRE_NO) AS TMTB_SE_NM FROM LECTURE_TIMETABLE LT
+		          INNER JOIN COM_CODE CC ON (CC.COM_CODE = LT.TMTB_SE)
+		)
+		SELECT
+			L.LCTRE_NO
+		    , C.COURSE_NM
+		    , C.COURSE_PNT
+		    , P.PRFSOR_NM
+		    , (SELECT COUNT(*) FROM ATTENDANCE_LECTURE_QUEST WHERE LCTRE_NO = L.LCTRE_NO) CURR_CNT /* 현재원 */
+		    , L.LCTRE_NMPR /* 정원 */
+		    , TV.TMTB_SE_NM /* 시간표 */
+		    , CASE WHEN L.FCLTS_NO IS NULL THEN CV.COM_CODE_NM
+		    ELSE F.BULD_NO||F.FCLTS_NM
+		    END AS FCLTS_NM /* 강의실 */
+		FROM
+		    LECTURE L 
+		            INNER JOIN COURSE C ON (L.COURSE_NO = C.COURSE_NO)
+		            INNER JOIN PROFESSOR P ON (L.PRFSOR_NO = P.PRFSOR_NO)
+		            INNER JOIN COMMONVIEW CV ON(CV.COM_CODE = L.LCTRE_SE)
+		            LEFT OUTER JOIN FACILITIES F ON (F.FCLTS_NO = L.FCLTS_NO)
+		            LEFT OUTER JOIN TIMETABLEVIEW TV ON (L.LCTRE_NO = TV.LCTRE_NO)
+		WHERE L.SEMSTR_SE = #{detailCondition.semstrSe}
+		ORDER BY COURSE_NM ASC
+	</select>
+
+
+	<select id="getRequestablePoint" parameterType="HashMap" resultType="int">
+		/* kr.ac.usu.lecture.mapper.StudentAttendanceLectureMapper.getRequestablePoint */
+			WITH SCOREVIEW AS(
+				SELECT
+					S.LCTRE_NO
+				    , SUM(S.SCORE_SCORE * (LES.LCTRE_EVL_STDR_REFLCT/100) ) AS SCORE_SCORE
+				FROM
+					LECTURE_EVALUATION_STANDARD LES INNER JOIN SCORE S ON(LES.SCORE_SE = S.SCORE_SE)
+													INNER JOIN LECTURE L ON (L.LCTRE_NO = S.LCTRE_NO)
+				WHERE
+					STDNT_NO = #{id}
+				AND
+					SUBSTR(LES.LCTRE_ACNUTNO_NO,2) = S.LCTRE_NO
+				GROUP BY S.LCTRE_NO
+			), COMPLVIEW AS (
+	            SELECT
+	                COM_CODE,
+	                COM_CODE_GRP,
+	                COM_CODE_NM,
+	                COM_CODE_DESC,
+	                USE_YN,
+	                COM_CODE_SEQ,
+	                UPPER_CODE_GRP,
+	                UPPER_COM_CODE
+	            FROM
+	                COM_CODE
+	            WHERE
+	                COM_CODE_GRP = 'SEC014'
+	        ), TARGETVIEW AS 
+			(
+				SELECT
+					(SELECT CAL_SCORE 
+				    FROM
+				    	SCORE_CHART
+				    WHERE 
+						SV.SCORE_SCORE BETWEEN MIN_SCORE AND MAX_SCORE
+				    ) CAL_SCORE
+				    , C.COURSE_NM
+				    , L.LCTRE_NO
+		            , C.COURSE_PNT
+		            , CV.COM_CODE_NM COMPL_SE
+				FROM
+					SCOREVIEW SV INNER JOIN LECTURE L ON(SV.LCTRE_NO = L.LCTRE_NO)
+									INNER JOIN COURSE C ON (C.COURSE_NO = L.COURSE_NO)
+		                            INNER JOIN COMPLVIEW CV ON (CV.COM_CODE = C.COMPL_SE)
+				WHERE
+		            L.SEMSTR_SE = #{preSemCd}
+	        ), TARGETVIEW2 AS(
+		        SELECT *
+		        FROM TARGETVIEW
+		        WHERE CAL_SCORE != 0
+	        ), CALSCOREVIEW AS(
+		        SELECT
+		        	(SUM(CAL_SCORE * COURSE_PNT)/(COUNT(*)*1.0)) /4.5 AS CALC
+		        FROM
+		        	TARGETVIEW2
+			)
+			SELECT 
+				<![CDATA[
+					CASE WHEN CALC > 4 THEN 21
+					WHEN CALC < 3 THEN 15
+				]]>
+				ELSE 18
+				END
+				-
+				(
+					SELECT SUM(C.COURSE_PNT)
+					FROM ATTENDANCE_LECTURE AL
+						INNER JOIN LECTURE L ON (L.LCTRE_NO = AL.LCTRE_NO )
+						INNER JOIN COURSE C ON (C.COURSE_NO = L.COURSE_NO)
+					WHERE AL.STDNT_NO = #{id}
+					AND L.SEMSTR_SE = #{currSemCd}
+				)
+			FROM CALSCOREVIEW
+	</select>
+</mapper>

@@ -1,0 +1,149 @@
+package kr.ac.usu.classroom.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.ac.usu.board.vo.AttatchingFileVO;
+import kr.ac.usu.classroom.service.StudentClassroomService;
+import kr.ac.usu.classroom.vo.ClassroomBoardVO;
+import kr.ac.usu.classroom.vo.TestQuestionVO;
+import kr.ac.usu.classroom.vo.TestVO;
+import kr.ac.usu.lecture.vo.LectureVO;
+import kr.ac.usu.lecture.vo.LectureVideoVO;
+import kr.ac.usu.user.mapper.LoginMapper;
+import lombok.extern.slf4j.Slf4j;
+
+@Controller
+@RequestMapping("/student/classroom")
+@Slf4j
+public class StudentClassRoomController {
+
+	@Inject
+	private StudentClassroomService service;
+	
+	@GetMapping
+	public String classRoomListUI(
+			Model model
+			, Authentication auth
+		) {
+		String id = auth.getName();
+		String semCd = LoginMapper.getCurrentRegularSemesterCode();
+		List<LectureVO> list = service.retrieveClassRoomList(id, semCd);
+		model.addAttribute("list", list);
+		return "student/classroom/studentClassRoomUI";
+	}
+	
+	@GetMapping("test/{lctreNo}")
+	public String classRoomTestPage(
+			Model model
+			, Authentication auth
+			, @PathVariable String lctreNo
+		) {
+		String id = auth.getName();
+		String semCd = LoginMapper.getCurrentRegularSemesterCode();
+		List<TestQuestionVO> list = service.retrieveTestQuestionList(id, semCd, lctreNo);
+		model.addAttribute("list", list);
+		return "ajax/student/classroom/classroomTestPage";
+	}
+	
+	@GetMapping("assignment/{lctreNo}")
+	public String classRoomAssignmentPage(
+			Model model
+			, Authentication auth
+			, @PathVariable String lctreNo
+		) {
+		String id = auth.getName();
+		String semCd = LoginMapper.getCurrentRegularSemesterCode();
+		List<ClassroomBoardVO> list = service.retrieveHomeWorkList(id, semCd, lctreNo);
+		model.addAttribute("list", list);
+		return "ajax/student/classroom/classroomAssignmentPage";
+	}
+	@GetMapping("classroomBoard/{lctreNo}")
+	public String classRoomClassroomBoardPage(
+			Model model
+			, Authentication auth
+			, @PathVariable String lctreNo
+		) {
+		String id = auth.getName();
+		String semCd = LoginMapper.getCurrentRegularSemesterCode();
+		List<ClassroomBoardVO> list = service.retrieveClassRoomBoardList(id, semCd, lctreNo);
+		model.addAttribute("list", list);
+		return "ajax/student/classroom/classroomClassroomBoardPage";
+	}
+	@GetMapping("onlineLecture/{lctreNo}")
+	public String classRoomOnlineLecturePage(
+			Model model
+			, Authentication auth
+			, @PathVariable String lctreNo
+		) {
+		String id = auth.getName();
+		String semCd = LoginMapper.getCurrentRegularSemesterCode();
+		List<LectureVideoVO> list = service.retrieveOnlineLectureList(id, semCd, lctreNo);
+		model.addAttribute("list", list);
+		return "ajax/student/classroom/classroomClassroomBoardPage";
+	}
+	
+	@GetMapping("test/{lctreNo}/{testSe}")
+	public String classRoomGetTest(
+			Model model
+			, Authentication auth
+			, @PathVariable String lctreNo
+			, @PathVariable String testSe
+		) throws Exception {
+		TestVO test = new TestVO();
+		test.setStdntNo(auth.getName());
+		test.setLctreNo(lctreNo);
+		test.setTestSe(testSe);
+		try {
+			TestQuestionVO data = service.retrieveTestQuestion(test);
+			AttatchingFileVO atch = data.getAtchFile();
+			List<String> list = service.getBase64(atch);
+			model.addAttribute("test", data);
+			model.addAttribute("list", list);
+			model.addAttribute("testAlreadyDone", false);
+		} catch (Exception e) {
+			model.addAttribute("testAlreadyDone", true);
+		}
+		return "iframe/studentTestPage";
+	}
+	
+	@PostMapping("test/{lctreNo}/{testSe}")
+	public String submitTest(
+			Model model
+			, Authentication auth
+			, @PathVariable String lctreNo
+			, @PathVariable String testSe
+			, @RequestParam Map<String, String> param
+			, @RequestParam int questionCnt
+		) {
+		log.info("post핸들러 파라미터맵 : {}",param);
+		String id = auth.getName();
+		service.createSubmitTest(param, id, lctreNo, testSe, questionCnt);
+		return "jsonView";
+	}
+
+	
+	@GetMapping("testInfo/{lctreNo}/{testSe}")
+	@ResponseBody
+	public int getTestResultInfo(
+			Model model
+			, Authentication auth
+			, @PathVariable String lctreNo
+			, @PathVariable String testSe
+		) {
+		return service.retrieveTestResultInfo(auth.getName(), lctreNo, testSe);
+	}
+}

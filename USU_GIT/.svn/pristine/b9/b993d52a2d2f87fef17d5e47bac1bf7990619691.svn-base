@@ -1,0 +1,59 @@
+package kr.ac.usu.student.controller;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.ac.usu.user.vo.StudentVO;
+import kr.ac.usu.user.vo.wrapper.StudentVOWrapper;
+
+/**
+ * @author 김석호
+ * @since 2023. 11. 13.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet 
+ * <pre>
+ * 학생 메뉴에서 뷰로 이동하기 전에 해당 뷰를 학생의 상태에 따라 이용여부를 판단하고 분기하기 위해 만든 컨트롤러
+ * [[개정이력(Modification Information)]]
+ * 수정일         수정자               수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 13.      김석호       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Controller
+public class StudentUICheckController {
+	
+	@GetMapping("/student/vacRequest")
+	public String vacRequest(
+			Authentication auth
+			, Model model
+		) {
+		
+		StudentVO student = ((StudentVOWrapper)auth.getPrincipal()).getRealUser();
+		
+		String sknrgs = student.getSchoolRegisterHistory().getSknrgsSe();
+		String viewName = null;
+		String messageFormat = "%s생은 사용할 수 없는 메뉴입니다.";
+		switch(sknrgs) {
+			case "재학" :
+				viewName = "student/academic/vacRequest";
+				break;
+			default : 
+				model.addAttribute("message", String.format(messageFormat, sknrgs));
+				viewName = "common/messageScript";
+				break;
+		}
+		return viewName;
+		
+		
+	}
+	
+	
+	
+	
+	
+	
+}

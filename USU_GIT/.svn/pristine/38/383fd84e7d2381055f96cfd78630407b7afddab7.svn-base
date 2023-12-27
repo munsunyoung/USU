@@ -1,0 +1,5 @@
+package kr.ac.usu.common.enumpkg;
+
+public enum SerivceResult {
+	OK, INVALIDPASSWORD, PKDUPLICATE, ALREADYDONE
+}

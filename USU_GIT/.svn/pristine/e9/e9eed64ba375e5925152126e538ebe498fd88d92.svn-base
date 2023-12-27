@@ -1,0 +1,86 @@
+/**
+ * <pre>
+ * 학생 ClassRoom 페이지에서 사용하는 자바스크립트
+ * </pre>
+ * @author 김석호
+ * @since 2023. 11. 27.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일       수정자       수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 27.      김석호       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+
+$(()=>{
+	// 탭 변환
+	$('.tabChangeBtn').on('click',function (){
+        var tabId = $(this).data('tab');
+		
+        $('.tabChangeBtn').removeClass('active');
+        $('.tab-content').removeClass('current');
+		
+        $(this).addClass('active');
+		
+        $(`#${tabId}`).addClass('current');
+    });
+
+
+
+});
+
+
+function getTestList(lctreNo){
+	var testListAjaxSettings = {
+		url : `/student/classroom/test/${lctreNo}`
+		, method : "get"
+		, success : function(res){
+			$('#testDivBody').html(res);
+		}
+		, error : function(xhr, status, err){
+			console.log(err);
+		}
+	};
+	$.ajax(testListAjaxSettings);
+}
+function getAssignmentList(lctreNo){
+	var assignmentAjaxSettings = {
+		url : `/student/classroom/assignment/${lctreNo}`
+		, method : "get"
+		, success : function(res){
+			$('#assignmentDivBody').html(res);
+		}
+		, error : function(xhr, status, err){
+			console.log(err);
+		}
+	};
+	$.ajax(assignmentAjaxSettings);
+}
+function getclassroomBoardList(lctreNo){
+	var classroomBoardAjaxSettings = {
+		url : `/student/classroom/classroomBoard/${lctreNo}`
+		, method : "get"
+		, success : function(res){
+			$('#classroomBoardDivBody').html(res);
+		}
+		, error : function(xhr, status, err){
+			console.log(err);
+		}
+	};
+	$.ajax(classroomBoardAjaxSettings);
+}
+function getonlineLectureList(lctreNo){
+	var onlineLectureAjaxSettings = {
+		url : `/student/classroom/onlineLecture/${lctreNo}`
+		, method : "get"
+		, success : function(res){
+			$('#onlineLectureDivBody').html(res);
+		}
+		, error : function(xhr, status, err){
+			console.log(err);
+		}
+	};
+	$.ajax(onlineLectureAjaxSettings);
+}

@@ -1,0 +1,102 @@
+package kr.ac.usu.lecture.service.impl;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import kr.ac.usu.consultation.mapper.StaffConsultationRequestMapper;
+import kr.ac.usu.lecture.mapper.StaffLectureRequestMapper;
+import kr.ac.usu.lecture.service.StaffLectureRequestService;
+import kr.ac.usu.lecture.service.StaffLectureService;
+import kr.ac.usu.lecture.vo.LectureRequestVO;
+import kr.ac.usu.lecture.vo.LectureVO;
+import kr.ac.usu.paging.vo.PaginationInfo;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * 
+ * @author PC-25
+ *
+ * @author 이재혁
+ * @since 2023. 11. 30.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet 
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일                          수정자               수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 30.      이재혁      최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class StaffLectureRequestServiceImpl implements StaffLectureRequestService{
+
+	private final StaffLectureRequestMapper lectureReqMapper;
+	
+	// 상담 신청 리스트
+	@Override
+	public void retrieveLectureRequestList(PaginationInfo<LectureRequestVO> paging) {
+
+		int totalRecord = lectureReqMapper.selectTotalRecord(paging);
+		paging.setTotalRecord(totalRecord);
+		List<LectureRequestVO> dataList = lectureReqMapper.selectLectureRequestList(paging);
+		paging.setDataList(dataList);
+		
+	}
+
+	// 상담 신청 정보
+	@Override
+	public LectureRequestVO retrieveLectureRequestInfo(String lctreReqstNo) {
+		LectureRequestVO lectureRequestInfo = lectureReqMapper.selectLectureRequestInfo(lctreReqstNo);
+		return lectureRequestInfo;
+	}
+
+	//상담 신청 승인 (상담 목록에 인서트, 업데이트)
+	@Override
+	public int modifyAppliedLectureRequest(LectureRequestVO lctreReqstNo, LectureVO lctreNo) {
+//		lctreReqstNo=========LectureRequestVO(rnum=0, lctreReqstNo=RF05824101, 
+//				lctreReqstDate=null, prfsorNo=00000106, courseNo=null, complSe=,,
+//				complSeNm=null, semstrSe=20231, semstrSeNm=null, confmSe=null,
+//				confmSeNm=null, lctreReqstReturn=null, lctreSe=null, lctreSeNm=null,
+//				fcltsNo=, buldNo=null, professor=null, course=null, facilitiess=null, 
+//				lctreAcnutnoNo=null, lectureRequestInfoVOList=null, 
+//				lectureActionPlanVO=null, facilities=null, building=null)
+		
+		
+		
+		
+		lctreNo.setLctreNo(lctreReqstNo.getLctreReqstNo());//RF05824101
+		lctreNo.setPrfsorNo(lctreReqstNo.getPrfsorNo());//00000106
+		lctreNo.setFcltsNo(lctreReqstNo.getFcltsNo());//null
+		//LectureRequestVO(rnum=0, lctreReqstNo=RF05824101, lctreReqstDate=null, prfsorNo=00000106, courseNo=null, complSe=,, 
+		//complSeNm=null, semstrSe=20231, semstrSeNm=null, confmSe=null, confmSeNm=null, lctreReqstReturn=null, lctreSe=null, 
+		//lctreSeNm=null, fcltsNo=, buldNo=null, professor=null, course=null, facilitiess=null, lctreAcnutnoNo=null, 
+		//lectureRequestInfoVOList=null, lectureActionPlanVO=null, facilities=null, building=null)
+		log.info("lctreReqstNo========={}", lctreReqstNo);
+		//lctreSe*(강의형태), fcltsNo, complSe, couresNo
+		//LectureVO(rnum=0, buldNm=null, fcltsNm=null, semstrSeNm=null, lctreNo=null, lctreNmpr=30, lctreSe=null, fcltsNo=, 
+		//prfsorNo=00000106, semstrSe=20231, complSe=,, courseNo=null, professor=null, facilities=null, course=null, 
+		//timetable=null, tmtbSeNm=null, student=null, currCnt=null, coursePnt=null, courseDayOfWeek=null, 
+		//courseNm=null, prfsorNm=null, currentPage=null, lctreReqstNo=RF05824102, evaStatus=null)
+		log.info("lctreNo : " + lctreNo);
+		
+		int res = lectureReqMapper.updateAppliedLectureRequest(lctreReqstNo);
+		
+		
+		res += lectureReqMapper.insertLecture(lctreNo);
+		
+		return res;
+	}
+
+	//상담 신청 반려 (상담 신청 정보 업데이트)
+	@Override
+	public int modifyRefusedLectureRequest(LectureRequestVO lctreReqstNo) {
+		int res = lectureReqMapper.updateRefusedLectureRequest(lctreReqstNo);
+		return res;
+	}
+
+}

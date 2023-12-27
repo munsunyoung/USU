@@ -1,0 +1,54 @@
+package kr.ac.usu.security;
+
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.stereotype.Component;
+
+/**
+ * 시큐리티 로그인 인증 핸들러
+ * @author 김석호
+ * @since 2023. 11. 9.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet 
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일         수정자               수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 9.      김석호       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Component
+public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler{
+
+	public CustomAuthenticationSuccessHandler() {
+		super();
+		setAlwaysUseDefaultTargetUrl(true);
+	}
+	
+	@Override
+		public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+				Authentication authentication) throws IOException, ServletException {
+			boolean isStudent = authentication.getAuthorities().stream().anyMatch(auth -> "ROLE_STUDENT".equals(auth.getAuthority()));
+			boolean isProfessor = authentication.getAuthorities().stream().anyMatch(auth -> "ROLE_PROFESSOR".equals(auth.getAuthority()));
+			
+			String target = null;
+			
+			if(!isStudent && !isProfessor) {
+				target = "/staff";
+			}else if(isStudent && !isProfessor) {
+				target = "/student";
+			}else if(!isStudent && isProfessor){
+				target = "/professor";
+			}
+			setDefaultTargetUrl(target);
+			super.onAuthenticationSuccess(request, response, authentication);
+		}
+	
+}

@@ -1,0 +1,32 @@
+package kr.ac.usu.user.vo;
+
+import kr.ac.usu.paging.vo.SearchVO;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ * @author 김재성
+ * @since 2023.11.13
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet 
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일          수정자            수정내용
+ * --------     --------    ----------------------
+ * 2023.11.13     김재성           최초작성
+ * 
+ * Copyright (c) ${year} by DDIT All right reserved
+ * </pre>
+ */
+@Data
+@NoArgsConstructor	// 기본생성자 생성
+@AllArgsConstructor	// property전체를 받는 생성자 생성
+public class SearchConditionVO{
+	
+	private String userId;
+	private String year;
+	private String semstrNo;
+	
+	
+}

@@ -1,0 +1,36 @@
+/*
+ * package kr.ac.usu.student.dao;
+ * 
+ * import static org.junit.jupiter.api.Assertions.*;
+ * 
+ * import java.util.List;
+ * 
+ * import javax.inject.Inject;
+ * 
+ * import org.junit.jupiter.api.Test;
+ * 
+ * import kr.ac.usu.vo.PaginationInfo; import kr.ac.usu.vo.StudentVO; import
+ * kr.ac.usu.AbstractRootContextTestFor; import lombok.extern.slf4j.Slf4j;
+ * 
+ * 
+ * @Slf4j class StudentDAOTest extends AbstractRootContextTestFor{
+ * 
+ * @Inject private StudentDAO dao;
+ * 
+ * 
+ * @Test void test1() { PaginationInfo<StudentVO> paging = new
+ * PaginationInfo<StudentVO>(); paging.setCurrentPage(1); int tot =
+ * dao.selectTotalCount(paging); log.info("토탈카운트 : {}",tot);
+ * paging.setTotalRecord(tot); List<StudentVO> list =
+ * dao.selectStudentList(paging);
+ * 
+ * // assertNotNull(paging);
+ * 
+ * assertNotEquals(0, list.size());
+ * 
+ * log.info("리스트 {}",list);
+ * 
+ * }
+ * 
+ * }
+ */

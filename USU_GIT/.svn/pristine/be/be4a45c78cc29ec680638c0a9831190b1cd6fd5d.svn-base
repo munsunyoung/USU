@@ -1,0 +1,51 @@
+package kr.ac.usu.classroom.mapper;
+
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.ac.usu.classroom.vo.TestAnswerVO;
+import kr.ac.usu.classroom.vo.TestQuestionVO;
+import kr.ac.usu.classroom.vo.TestVO;
+
+/**
+ * @author PC-21
+ *
+ * @author 김재성
+ * @since 2023. 11. 27.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet 
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 	수정일            수정자            수정내용
+ * ----------     --------    ----------------------
+ * 2023.11.27.      김재성       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Mapper
+public interface ProfessorClassroomTestMapper {
+	
+	
+	/**
+	 * 교수가 강의중인 한 강의에 시험을 등록
+	 * @param test
+	 * @return
+	 */
+	public int insertTest(TestVO test);
+	
+	/**
+	 * 교수가 강의중인 한 강의에 시험 출제 등록
+	 * @param testQeust
+	 * @return 
+	 */
+	public int insertClassroomTestQuest(TestQuestionVO testQeust);
+	
+	/**
+	 * 교수가 강의중인 한 강의에 시험 답안 등록
+	 * @param testAnwser
+	 * @return
+	 */
+	public int insertTestAnswerPaper(TestAnswerVO testAnwser);
+	
+	
+}

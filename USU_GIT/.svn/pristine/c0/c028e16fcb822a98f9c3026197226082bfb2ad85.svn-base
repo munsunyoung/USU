@@ -1,0 +1,45 @@
+/**
+ * <pre>
+ * 
+ * </pre>
+ * @author 작성자명
+ * @since 2023. 11. 16.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일        수정자       수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 16.      이재혁       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */ 
+$(document).ready(function () {
+    $("#findIdButton").click(function () {
+        // 비밀번호 찾기 모달에서 입력한 정보 가져오기
+        var userType = $("input[name='userType']:checked").val(); // 선택된 사용자 유형 가져오기
+        var name = $("#" + userType + "Nm").val();
+        var ihidnum1 = $("#" + userType + "Ihidnum1").val();
+        var ihidnum2 = $("#" + userType + "Ihidnum2").val();
+
+        // 서버로 데이터 전송
+        $.ajax({
+            type: "POST",
+            url: "/findId", // 실제 서버의 주소에 맞게 수정
+            data: {
+                userType: userType,
+                name: name,
+                ihidnum1: ihidnum1,
+                ihidnum2: ihidnum2
+            },
+            success: function (data) {
+                // 서버에서 받아온 아이디를 모달에 표시
+                $("#resultModalBody").text("찾은 아이디: " + data);
+                $("#resultModal").modal("show");
+            },
+            error: function (error) {
+                // 오류 처리
+                alert("아이디를 찾을 수 없습니다.");
+            }
+        });
+    });
+});

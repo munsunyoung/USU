@@ -1,0 +1,33 @@
+package kr.ac.usu.student.dao.lecture;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.junit.jupiter.api.Test;
+
+import kr.ac.usu.AbstractRootContextTestFor;
+import kr.ac.usu.lecture.mapper.StudentLectureMapper;
+import kr.ac.usu.lecture.vo.LectureVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+class StudentLectureListDAOTest extends AbstractRootContextTestFor{
+
+	@Inject
+	private StudentLectureMapper dao;
+	
+	@Test
+	void test() {
+		List<LectureVO> rs = dao.selectStudentLectureList("20232301");
+		
+//		log.info("{}",rs);
+		
+		 LectureVO rs1 = rs.get(0);
+		 
+		
+	}
+
+}

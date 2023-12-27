@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.usu.classroom.mapper.ProfessorClassroomMapper">
+	
+	
+	<resultMap type="kr.ac.usu.lecture.vo.LectureVO" id="classroomLectureMap" autoMapping="true">
+		<id property="lctreNo" column="LCTRE_NO"/>
+		<association property="facilities" javaType="kr.ac.usu.facilities.vo.FacilitiesVO" autoMapping="true" >
+			<association property="building" javaType="kr.ac.usu.facilities.vo.BuildingVO" autoMapping="true">
+				<result property="buldNo" column="BULD_NO"/>
+			</association>
+		</association>
+		<association property="course" javaType="kr.ac.usu.course.vo.CourseVO" autoMapping="true" />
+		<collection property="timetable" ofType="kr.ac.usu.lecture.vo.LectureTimetableVO" >
+			<result column="TMTB_SE" property="tmtbSe"/>
+		</collection>
+	</resultMap>
+	<select id="selectClassroomProfessorLecture" parameterType="String" resultType="kr.ac.usu.lecture.vo.LectureVO" resultMap="classroomLectureMap">
+        WITH
+        LCTREVIEW AS ( SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC015'),
+        SEMSTRVIEW AS (SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC018'),
+        COMPLVIEW AS (SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC014'),
+        TMTBVIEW AS (SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC011'),
+        FACILITIESVIEW AS (
+			 	SELECT 
+			 		FCLTS_NO,
+			 		FCLTS_NM,
+					F.BULD_NO,
+					PRFSOR_NO,
+					BULD_NM,
+					CLG_NO
+				FROM 
+					FACILITIES F
+					INNER JOIN BUILDING B ON (F.BULD_NO = B.BULD_NO))
+		
+		SELECT
+	 		DISTINCT
+			L.LCTRE_NO,
+			LCTRE_NMPR,
+			L.FCLTS_NO,
+			L.PRFSOR_NO,
+			L.SEMSTR_SE,
+			S.COM_CODE_NM SEMSTR_SE_NM,
+			L.COURSE_NO,
+            C.COM_CODE_NM LCTRE_SE,
+            O.COM_CODE_NM COMPL_SE,
+            X.BULD_NM,
+            X.FCLTS_NM,
+            COURSE_NM,
+            T.COM_CODE_NM TMTB_SE
+               
+		FROM   LECTURE L
+                  LEFT OUTER JOIN LCTREVIEW C ON (C.COM_CODE = L.LCTRE_SE)
+                  LEFT OUTER JOIN SEMSTRVIEW S ON (S.COM_CODE = '0'||SUBSTR(L.SEMSTR_SE,5))
+                  LEFT OUTER JOIN COMPLVIEW O ON (O.COM_CODE = L.LCTRE_SE)
+                  LEFT OUTER JOIN FACILITIESVIEW X ON (X.FCLTS_NO = L.FCLTS_NO)
+                  INNER JOIN COURSE U ON (L.COURSE_NO = U.COURSE_NO)
+                  LEFT OUTER JOIN LECTURE_TIMETABLE V ON (L.LCTRE_NO = V.LCTRE_NO)
+                  LEFT OUTER JOIN TMTBVIEW T ON (V.TMTB_SE = T.COM_CODE)
+                  
+          WHERE L.PRFSOR_NO= #{prfsorNo,jdbcType=VARCHAR}
+	</select>
+	
+	<insert id="insertTest" parameterType="kr.ac.usu.classroom.vo.TestVO">
+		INSERT INTO TEST (
+			TEST_SE
+			, LCTRE_NO
+		) VALUES (
+			#{testSe,jdbcType=VARCHAR}
+			, #{lctreNo,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<insert id="insertTestFile" parameterType="kr.ac.usu.board.vo.AttatchingFileVO">
+		<selectKey order="BEFORE" keyProperty="atchFileNo" resultType="String">
+			SELECT
+				TO_CHAR(SYSDATE,'YYMMDD')||LPAD(NVL(MAX(SUBSTR(ATCH_FILE_NO,7)),0)+1,8,'0')
+			FROM
+				ATTACHING_FILE
+			WHERE
+				SUBSTR(ATCH_FILE_NO,1,6) = TO_CHAR(SYSDATE,'YYMMDD')
+		</selectKey>
+		INSERT INTO ATTACHING_FILE (
+			ATCH_FILE_NO
+			, ATCH_FILE_SN
+			, ATCH_FILE_NM
+			, ATCH_FILE_STRE_NM
+			, ATCH_FILE_STRE_PATH
+			, ATCH_FILE_MG
+			, ATCH_FILE_INDICT_MG
+			, ATCH_FILE_MIME_TYPE
+		) VALUES (
+			#{atchFileNo,jdbcType=VARCHAR}
+			, (SELECT NVL(MAX(ATCH_FILE_SN),0)+1 FROM ATTACHING_FILE WHERE ATCH_FILE_NO = #{atchFileNo,jdbcType=VARCHAR})
+			, #{atchFileNm,jdbcType=VARCHAR}
+			, #{atchFileStreNm,jdbcType=VARCHAR}
+			, #{atchFileStrePath,jdbcType=VARCHAR}
+			, #{atchFileMg,jdbcType=NUMERIC}
+			, #{atchFileIndictMg,jdbcType=VARCHAR}
+			, #{atchFileMimeType,jdbcType=VARCHAR}
+		)
+		
+	</insert>
+	
+	<insert id="insertTestQuestion" parameterType="kr.ac.usu.classroom.vo.TestQuestionVO">
+		INSERT INTO TEST_QUESTION (
+		    TEST_SE
+		    , LCTRE_NO
+		    , ATCH_FILE_NO
+		    , TEST_QUST_TIME
+		) VALUES (
+			#{testSe,jdbcType=VARCHAR}
+			, #{lctreNo,jdbcType=VARCHAR}
+			, #{atchFileNo,jdbcType=VARCHAR}
+			, #{testQustTime,jdbcType=NUMERIC}
+		)
+	</insert>
+	
+	<insert id="insertClassroomTestQuest" parameterType="List">
+		INSERT ALL
+		<foreach collection="list" item="item" separator=" " >
+			 INTO TEST_ANSWER_PAPER
+			 	(TEST_QUES_NO,TEST_SE,LCTRE_NO,TEST_ASWPER)
+			 VALUES
+			 	(#{item.testQuesNo,jdbcType=VARCHAR}, #{item.testSe,jdbcType=VARCHAR}, #{item.lctreNo,jdbcType=VARCHAR}, #{item.testAswper,jdbcType=VARCHAR})
+		</foreach>
+		SELECT * FROM DUAL
+	</insert>
+	
+	
+	<insert id="insertAssignment" parameterType="kr.ac.usu.classroom.vo.ClassroomBoardVO">
+<!-- 		<selectKey order="BEFORE" keyProperty="crNo" resultType="String"> -->
+<!-- 			SELECT  -->
+<!-- 		</selectKey> -->
+		
+<!-- 		INSERT INTO CLASSROOM_BOARD -->
+<!-- 			( -->
+<!-- 				CR_NO -->
+<!-- 				,CR_SE -->
+<!-- 				,CR_TITLE -->
+<!-- 				,CR_CN -->
+<!-- 				,CR_WRTER -->
+<!-- 				,CR_DATE -->
+<!-- 				,ATCH_FILE_NO -->
+<!-- 				,LCTRE_NO -->
+<!-- 			) -->
+<!-- 		VALUES  -->
+<!-- 			( -->
+<!-- 				#{} -->
+<!-- 				#{} -->
+<!-- 				#{} -->
+<!-- 				#{} -->
+<!-- 				#{} -->
+<!-- 				#{} -->
+<!-- 			) -->
+			
+	</insert>
+</mapper>

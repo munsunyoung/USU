@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.usu.student.mapper.StaffRegisterStatusRequestMapper">
+
+	<resultMap type="kr.ac.usu.student.vo.SchoolRegisterVO" id="registerStatusMap" autoMapping="true">
+		<id property="sknrgNo" column="SKNRG_NO"/>
+		<association property="student" javaType="kr.ac.usu.user.vo.StudentVO" autoMapping="true">
+			<association property="subject" javaType="kr.ac.usu.subject.vo.SubjectVO" autoMapping="true">
+				<association property="college" javaType="kr.ac.usu.facilities.vo.CollegeVO" autoMapping="true"/>
+			</association>
+		</association>
+	</resultMap>
+
+	<sql id="searchFrag"> 
+		<where>
+	    	<if test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	    		<choose>
+	    			<when test="simpleCondition.searchType eq 'stdntNo'">
+	    				INSTR(STDNT_NO, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<when test="simpleCondition.searchType eq 'stdntNm'">
+	    				INSTR(STDNT_NM, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<when test="simpleCondition.searchType eq 'sknrgSttusMajor1'">
+	    				INSTR(SKNRG_STTUS_MAJOR1, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<otherwise>
+	    				INSTR(STDNT_NO, #{simpleCondition.searchWord}) > 0
+	    				OR
+	    				INSTR(STDNT_NM, #{simpleCondition.searchWord}) > 0
+	    				OR
+	    				INSTR(SKNRG_STTUS_MAJOR1, #{simpleCondition.searchWord}) > 0
+	    			</otherwise>
+	    		</choose>
+	    	</if>
+	    </where>
+	</sql>
+	
+	<sql id="doubleMajorFromFrag">
+		SELECT DISTINCT
+		    a.sknrg_no
+		    , a.stdnt_no
+		    , b.stdnt_nm
+		    , d.subjct_nm sknrg_sttus_major1
+		    , SUBSTR(a.sknrg_date,1,2) || '/' || SUBSTR(a.sknrg_date,3,2) || '/' || SUBSTR(a.sknrg_date,5,2) sknrg_date
+		    , com_code_nm confm_se
+		FROM
+		    school_register a INNER JOIN student_information b on (a.stdnt_no = b.stdnt_no)
+		    INNER JOIN school_register_status c on (a.stdnt_no = c.stdnt_no)
+		    INNER JOIN subject d on (c.sknrg_sttus_major1 = d.subjct_no)
+		    INNER JOIN com_code e on (a.confm_se = e.com_code)
+		WHERE
+		    a.sknrg_se = '02'
+		    AND e.com_code_grp = 'SEC013'
+	</sql>
+	
+	<sql id="minorFromFrag">
+		SELECT DISTINCT
+		    a.sknrg_no
+		    , a.stdnt_no
+		    , b.stdnt_nm
+		    , d.subjct_nm sknrg_sttus_major1
+		    , SUBSTR(a.sknrg_date,1,2) || '/' || SUBSTR(a.sknrg_date,3,2) || '/' || SUBSTR(a.sknrg_date,5,2) sknrg_date
+		    , com_code_nm confm_se
+		FROM
+		    school_register a INNER JOIN student_information b on (a.stdnt_no = b.stdnt_no)
+		    INNER JOIN school_register_status c on (a.stdnt_no = c.stdnt_no)
+		    INNER JOIN subject d on (c.sknrg_sttus_major1 = d.subjct_no)
+		    INNER JOIN com_code e on (a.confm_se = e.com_code)
+		WHERE
+		    a.sknrg_se = '03'
+		    AND e.com_code_grp = 'SEC013'
+	</sql>
+	
+	<sql id="moveMajorFromFrag">
+		SELECT DISTINCT
+		    a.sknrg_no
+		    , a.stdnt_no
+		    , b.stdnt_nm
+		    , d.subjct_nm sknrg_sttus_major1
+		    , SUBSTR(a.sknrg_date,1,2) || '/' || SUBSTR(a.sknrg_date,3,2) || '/' || SUBSTR(a.sknrg_date,5,2) sknrg_date
+		    , com_code_nm confm_se
+		FROM
+		    school_register a INNER JOIN student_information b on (a.stdnt_no = b.stdnt_no)
+		    INNER JOIN school_register_status c on (a.stdnt_no = c.stdnt_no)
+		    INNER JOIN subject d on (c.sknrg_sttus_major1 = d.subjct_no)
+		    INNER JOIN com_code e on (a.confm_se = e.com_code)
+		WHERE
+		    a.sknrg_se = '04'
+		    AND e.com_code_grp = 'SEC013'
+	</sql>
+	
+	<!-- 복수전공 신청 목록 불러오기 ////////////////////////////////////////////////////////////////////////////////////////// -->
+	<select id="selectDoubleMajorRequestTotalRecord" resultType="int" parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM
+		(<include refid="doubleMajorFromFrag" />)
+			
+		<include refid="searchFrag" />
+	</select>
+	
+	<select id="selectDoubleMajorRequestList" resultMap="registerStatusMap" parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+		SELECT A.*
+		FROM (
+			SELECT ROWNUM RNUM, B.*
+			FROM(
+				<include refid="doubleMajorFromFrag" />
+				) B
+			<include refid="searchFrag" />
+		) A
+		<![CDATA[
+	    WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+	    ]]>
+	</select>
+	<!-- //////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+	<!-- 부전공 신청 목록 불러오기 ////////////////////////////////////////////////////////////////////////////////////////// -->
+	<select id="selectMinorRequestTotalRecord" resultType="int" parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM
+		(<include refid="minorFromFrag" />)
+			
+		<include refid="searchFrag" />
+	</select>
+	
+	<select id="selectMinorRequestList" resultMap="registerStatusMap" parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+		SELECT A.*
+		FROM (
+			SELECT ROWNUM RNUM, B.*
+			FROM(
+				<include refid="minorFromFrag" />
+				) B
+			<include refid="searchFrag" />
+		) A
+		<![CDATA[
+	    WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+	    ]]>
+	</select>
+	<!-- //////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+	
+	<!-- 전과 신청 목록 불러오기 ////////////////////////////////////////////////////////////////////////////////////////// -->
+	<select id="selectMoveRequestTotalRecord" resultType="int" parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM
+		(<include refid="moveMajorFromFrag" />)
+			
+		<include refid="searchFrag" />
+	</select>
+	
+	<select id="selectMoveMajorRequestList" resultMap="registerStatusMap" parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+		SELECT A.*
+		FROM (
+			SELECT ROWNUM RNUM, B.*
+			FROM(
+				<include refid="moveMajorFromFrag" />
+				) B
+			<include refid="searchFrag" />
+		) A
+		<![CDATA[
+	    WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+	    ]]>
+	</select>
+	<!-- //////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

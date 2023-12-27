@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="kr.ac.usu.schoolaffairsschedule.mapper.StaffSchoolAffairsScheduleMapper">
+
+
+<resultMap type="kr.ac.usu.schoolaffairsschedule.vo.SchoolAffairsScheduleVO" id="schoolaffairsscheduleMap" autoMapping="true">
+		<id property="scduSe" column="SCDU_SE"/>
+	</resultMap>
+	
+	  <sql id="searchPro">
+    <where>
+    	<if test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+    		<choose>
+    		<when test="simpleCondition.searchType eq 'SCHAFS_BEGIN_DATE'">
+    			INSTR(SCHAFS_BEGIN_DATE, #{simpleCondition.searchWord}) > 0
+    		</when>		
+    		<when test="simpleCondition.searchType eq 'SCHAFS_END_DATE'">
+    			INSTR(SCHAFS_END_DATE, #{simpleCondition.searchWord}) > 0
+    		</when>
+    		<otherwise>
+    			INSTR(SCHAFS_BEGIN_DATE, #{simpleCondition.searchWord}) > 0
+    			OR
+    			INSTR(SCHAFS_END_DATE, #{simpleCondition.searchWord}) > 0
+    		</otherwise>		
+    		</choose>
+    	</if>
+    </where>
+   </sql>
+
+<select id="selectTotalRecord" resultType="int" parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+	SELECT COUNT(*)
+	FROM SCHOOL_AFFAIRS_SCHEDULE
+	<include refid="searchPro"/>
+</select>
+
+	<select id="selectStaffSchoolAffairsScheduleList" parameterType="kr.ac.usu.paging.vo.PaginationInfo" resultMap="schoolaffairsscheduleMap">
+	WITH SCDU AS (
+		SELECT * FROM COM_CODE WHERE COM_CODE_GRP = 'SEC010'
+	)
+		SELECT
+			A.*
+		FROM (
+			SELECT
+				ROWNUM RNUM
+			    ,SCHAFS_BEGIN_DATE,
+			    SCHAFS_END_DATE,			 
+			    SC.COM_CODE_NM SCDU_SE,
+			    SUBSTR(SEMSTR_SE,1,4)||'년도 '||SUBSTR(SEMSTR_SE,5,1)||'학기' SEMSTR_SE
+			FROM
+			    SCHOOL_AFFAIRS_SCHEDULE SAS
+			    INNER JOIN SCDU SC ON (SC.COM_CODE = SAS.SCDU_SE)    
+			    <include refid="searchPro"/>
+			    ) A
+			<![CDATA[
+			WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+			]]>
+	</select>
+	
+	<insert id="insertSchoolAffairsSchedule" parameterType="kr.ac.usu.schoolaffairsschedule.vo.SchoolAffairsScheduleVO">	
+    /* kr.ac.usu.SchoolAffairsSchedule.mapper.SchoolAffairsScheduleMapper.insertSchoolAffairsSchedule */
+    INSERT INTO SCHOOL_AFFAIRS_SCHEDULE (
+        SCDU_SE,
+        SEMSTR_SE, 
+        SCHAFS_BEGIN_DATE,
+        SCHAFS_END_DATE
+    ) VALUES (
+        #{scduSe,jdbcType=VARCHAR},
+        #{semstrSe,jdbcType=VARCHAR},    
+        #{schafsBeginDate,jdbcType=VARCHAR},
+        #{schafsEndDate,jdbcType=VARCHAR}
+    )
+</insert>
+	
+	<select id="selectComCode" parameterType="String" resultType="kr.ac.usu.user.vo.ComCodeVO">
+		SELECT
+		    COM_CODE
+		    , COM_CODE_GRP
+		    , COM_CODE_NM
+		    , COM_CODE_DESC
+		    , USE_YN
+		    , COM_CODE_SEQ
+		    , UPPER_CODE_GRP
+		    , UPPER_COM_CODE
+		FROM
+		    COM_CODE
+		WHERE
+			COM_CODE_GRP = #{comCodeGrp}
+	</select>
+	
+	</mapper>

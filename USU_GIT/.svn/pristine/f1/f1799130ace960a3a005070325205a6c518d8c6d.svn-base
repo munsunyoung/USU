@@ -1,0 +1,5 @@
+package kr.ac.usu.schoolaffairsschedule.mapper;
+
+public interface StaffSchoolAffairsScheduleMapper {
+
+}

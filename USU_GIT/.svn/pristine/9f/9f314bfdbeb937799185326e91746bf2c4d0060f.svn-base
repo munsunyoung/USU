@@ -1,0 +1,66 @@
+package kr.ac.usu.mail.controller;
+
+import javax.inject.Inject;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.ac.usu.mail.service.MailService;
+import kr.ac.usu.mail.vo.EmailRoomVO;
+
+@Controller
+@RequestMapping("/mail")
+public class MailWriteController {
+
+	@Inject
+    private final MailService service;
+
+
+    public MailWriteController(MailService service) {
+        this.service = service;
+    }
+
+    // 메일 작성 페이지 불러오기
+    @GetMapping("mailWrite")
+    public String mailWriteView() {
+        return "/ajax/mail/mailWrite";
+    }
+    
+ // 메일 작성 페이지 불러오기
+    @GetMapping("mailDetail")
+    public String mailDetailView(@ModelAttribute EmailRoomVO emailRoomVO, Authentication auth, Model model) {
+    	emailRoomVO.setEmailRcver(auth.getName());
+    	EmailRoomVO email = service.getMail(emailRoomVO); 
+    	model.addAttribute("email", email); 
+    	   	
+        return "/ajax/mail/mailDetail";
+    }
+
+    // 메일 저장
+    @PostMapping("saveMail")
+    @ResponseBody
+    public String saveMail(@RequestBody EmailRoomVO emailRoomVO) {
+    	System.out.println("=======================");
+    	//System.out.println();
+
+    	//session 에 있는 사용자 아이디를 mailSender에 집어넣는다. 직접해보ㅏ
+    	int r = service.insertMail(emailRoomVO);
+    	if(r > 0) {
+    		return "success";
+    	}else {
+    		
+    		return "실패";
+    	}
+		/*
+		 * JsonResultVO jsonResult = new JsonResultVO("SUCCESS", ""); return jsonResult;
+		 */
+    }
+    
+}

@@ -1,0 +1,35 @@
+package kr.ac.usu.user.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import kr.ac.usu.user.mapper.IdFindMapper;
+import kr.ac.usu.user.vo.ProfessorVO;
+import kr.ac.usu.user.vo.StaffVO;
+import kr.ac.usu.user.vo.StudentVO;
+
+/**
+ * 
+ * @author PC-25
+ *
+ * @author 이재혁
+ * @since 2023. 11. 7.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet 
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일                          수정자               수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 7.      작성자명       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+public interface IdFindService {
+	
+	 public ProfessorVO findProfessor(String prfsorNm, String prfsorIhidnum1, String prfsorIhidnum2);
+	 
+	 public StaffVO findStaff(String sklstfNm, String sklstfIhidnum1, String sklstfIhidnum2);
+	 
+	 public StudentVO findStudent(String stdntNm, String stdntIhidnum1, String stdntIhidnum2);
+	 
+}

@@ -1,0 +1,31 @@
+package kr.ac.usu.classroom.service;
+
+import java.util.List;
+import java.util.Map;
+
+import kr.ac.usu.board.vo.AttatchingFileVO;
+import kr.ac.usu.classroom.vo.ClassroomBoardVO;
+import kr.ac.usu.classroom.vo.TestQuestionVO;
+import kr.ac.usu.classroom.vo.TestVO;
+import kr.ac.usu.common.enumpkg.ServiceResult;
+import kr.ac.usu.lecture.vo.LectureVO;
+import kr.ac.usu.lecture.vo.LectureVideoVO;
+
+public interface StudentClassroomService {
+	
+	public List<LectureVO> retrieveClassRoomList(String id, String semCd);
+	public List<ClassroomBoardVO> retrieveHomeWorkList(String id, String semCd, String lctreNo);
+	public List<TestQuestionVO> retrieveTestQuestionList(String id, String semCd, String lctreNo);
+	public TestQuestionVO retrieveTestQuestion(TestVO test);
+	
+	public List<AttatchingFileVO> retrieveAttatchingFileList(String atchFileNo);
+	public List<ClassroomBoardVO> retrieveClassRoomBoardList(String id, String semCd, String lctreNo);
+	public List<LectureVideoVO> retrieveOnlineLectureList(String id, String semCd, String lctreNo);
+	public AttatchingFileVO retrieveOneAttatchingFile(AttatchingFileVO fileInfo);
+	
+	public void createSubmitTest(Map<String, String> paramMap, String id, String lctreNo, String testSe, int questionCnt);
+	
+	public int retrieveTestResultInfo(String id, String lctreNo, String testSe);
+	
+	public List<String> getBase64(AttatchingFileVO atch) throws Exception;
+}

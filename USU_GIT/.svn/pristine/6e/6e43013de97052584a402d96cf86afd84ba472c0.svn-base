@@ -1,0 +1,37 @@
+package kr.ac.usu.user.mapper;
+/**
+ * 
+ * @author PC-25
+ *
+ * @author 이재혁
+ * @since 2023. 11. 7.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet 
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일                          수정자               수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 7.      이재혁       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import kr.ac.usu.user.vo.ProfessorVO;
+import kr.ac.usu.user.vo.StaffVO;
+import kr.ac.usu.user.vo.StudentVO;
+
+@Mapper
+public interface IdFindMapper {
+
+	 public ProfessorVO findProfessor(@Param("prfsorNm") String prfsorNm, @Param("prfsorIhidnum1") String prfsorIhidnum1, @Param("prfsorIhidnum2") String prfsorIhidnum2);
+	
+
+	 public StaffVO findStaff(@Param("sklstfNm") String sklstfNm, @Param("sklstfIhidnum1") String sklstfIhidnum1, @Param("sklstfIhidnum2") String sklstfIhidnum2);
+	
+
+	 public StudentVO findStudent(@Param("stdntNm") String stdntNm, @Param("stdntIhidnum1") String stdntIhidnum1, @Param("stdntIhidnum2") String stdntIhidnum2);
+	
+}

@@ -1,0 +1,74 @@
+/**
+ * <pre>
+ * 
+ * </pre>
+ * @author 김재성
+ * @since 2023. 11. 27.
+ * @version 1.0
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 	  수정일    		    수정자       수정내용
+ * --------------     --------    ----------------------
+ * 2023. 11. 27.     	김재성       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */ 
+ $(function(){
+
+        
+   
+    $(".modal-body").on("submit", "#addConsultationRequest", function(event){
+		event.preventDefault();
+		
+		let data = $(this).serialize();
+		
+		console.log("data$$$$$$$$$$$$$$$$$$$$$$$$$$$",data);
+		
+		let settings = {
+			url : "/professor/consultation/updateAllowConsultationRequest"
+			, method :"POST"
+			, data : data
+			// , data : JSON.stringify(data)
+			, dataType : 'json'
+			// , contentType : 'application/json;charset=utf-8'
+			, success : function(resp){
+				if(resp.success){
+					//alert(resp.message);
+					Swal.fire({
+					  icon: "success",
+					  title: resp.message,
+					  showConfirmButton: false,
+					  timer: 1500
+					});
+					location.reload();
+				}else{
+					alert(resp.message);
+				}
+				
+				
+			}
+			, error : function(xhr, status, err){
+				console.log(err);
+					alert("잘못된 요청 발생!");
+			}
+		};
+		$.ajax(settings);
+	});
+	
+	$("#modal_open").on("show.bs.modal", function(event){
+		let $modal = $(this);
+		let trTag = event.relatedTarget;
+		let url = "/professor/classroom/addTest";
+		$.get(url)
+			.done(function(resp){
+				$modal.find(".modal-body").html(resp);
+			});
+		}).on("hidden.bs.modal", function(event){
+			$(this).find(".modal-body").empty();
+		});
+
+    $("#modal_openClose").click(function(){
+        $("#modal_open").modal('hide');
+    });    
+
+ });

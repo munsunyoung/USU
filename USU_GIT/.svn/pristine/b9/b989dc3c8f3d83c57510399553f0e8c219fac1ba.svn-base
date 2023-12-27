@@ -1,0 +1,51 @@
+package kr.ac.usu.user.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import kr.ac.usu.staff.mapper.StaffStaffMapper;
+import kr.ac.usu.user.mapper.IdFindMapper;
+import kr.ac.usu.user.service.IdFindService;
+import kr.ac.usu.user.vo.ProfessorVO;
+import kr.ac.usu.user.vo.StaffVO;
+import kr.ac.usu.user.vo.StudentVO;
+import lombok.RequiredArgsConstructor;
+
+/**
+ * 
+ * @author PC-25
+ *
+ * @author 이재혁
+ * @since 2023. 11. 7.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet
+ * 
+ *      <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일                          수정자               수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 7.      이재혁       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ *      </pre>
+ */
+@Service
+public class IdFindServiceImpl implements IdFindService {
+    @Autowired
+    private IdFindMapper idFindMapper;
+
+    @Override
+    public ProfessorVO findProfessor(String prfsorNm, String prfsorIhidnum1, String prfsorIhidnum2) {
+        return idFindMapper.findProfessor(prfsorNm, prfsorIhidnum1, prfsorIhidnum2);
+    }
+
+    @Override
+    public StaffVO findStaff(String sklstfNm, String sklstfIhidnum1, String sklstfIhidnum2) {
+        return idFindMapper.findStaff(sklstfNm, sklstfIhidnum1, sklstfIhidnum2);
+    }
+
+    @Override
+    public StudentVO findStudent(String stdntNm, String stdntIhidnum1, String stdntIhidnum2) {
+        return idFindMapper.findStudent(stdntNm, stdntIhidnum1, stdntIhidnum2);
+    }
+}
+

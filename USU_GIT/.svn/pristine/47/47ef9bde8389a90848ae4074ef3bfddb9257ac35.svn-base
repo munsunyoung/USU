@@ -1,0 +1,5 @@
+package kr.ac.usu.scholarship.controller;
+
+public class ScholarshipListController {
+
+}

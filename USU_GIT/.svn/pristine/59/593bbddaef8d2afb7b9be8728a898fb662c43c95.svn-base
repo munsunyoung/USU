@@ -1,0 +1,73 @@
+package kr.ac.usu.user.controller;
+
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+
+import kr.ac.usu.user.service.IdFindService;
+import kr.ac.usu.user.vo.ProfessorVO;
+import kr.ac.usu.user.vo.StaffVO;
+import kr.ac.usu.user.vo.StudentVO;
+
+/**
+ * 
+ * @author PC-25
+ *
+ * @author 이재혁
+ * @since 2023. 11. 7.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet 
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일                          수정자               수정내용
+ * --------     --------    ----------------------
+ * 2023. 11. 7.      이재혁       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Controller
+public class IdFindController {
+    @Autowired
+    private IdFindService idFindService;
+
+    @ResponseBody
+    @PostMapping("/findProfessor")
+    public ResponseEntity<?> findProfessor(@RequestParam String prfsorNm, @RequestParam String prfsorIhidnum1, @RequestParam String prfsorIhidnum2) {
+        ProfessorVO professor = idFindService.findIdProfessor(prfsorNm, prfsorIhidnum1, prfsorIhidnum2);
+        return getResponseEntity(professor);
+    }
+
+    @ResponseBody
+    @PostMapping("/findStaff")
+    public ResponseEntity<?> findStaff(@RequestParam String sklstfNm, @RequestParam String sklstfIhidnum1, @RequestParam String sklstfIhidnum2) {
+        StaffVO staff = idFindService.findIdStaff(sklstfNm, sklstfIhidnum1, sklstfIhidnum2);
+        return getResponseEntity(staff);
+    }
+
+    @ResponseBody
+    @PostMapping(value="/findStudent")
+    public ResponseEntity<StudentVO> findStudent(
+    		@RequestParam Map<String, String> param
+//    		@RequestParam String stdntNm, @RequestParam String stdntIhidnum1, @RequestParam String stdntIhidnum2
+    	) {
+    	System.out.println(":::::::::::::::::::::::::" + param.get("gestdntNm"));
+        StudentVO student = idFindService.findIdStudent(param.get("gestdntNm"), param.get("stdntIhidnum1"), param.get("stdntIhidnum2"));
+        return new ResponseEntity<StudentVO>(student, HttpStatus.OK);
+    }
+
+    private ResponseEntity<?> getResponseEntity(Object result) {
+        if (result != null) {
+            return ResponseEntity.ok(result);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("아이디를 찾을 수 없습니다.");
+        }
+    }
+}
+

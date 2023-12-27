@@ -1,0 +1,62 @@
+package kr.ac.usu.classroom.controller;
+
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.ac.usu.classroom.service.ProfessorClassroomTestService;
+import kr.ac.usu.classroom.vo.TestQuestionVO;
+import kr.ac.usu.validate.grouphint.InsertGroup;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * 
+ * @author PC-21
+ *
+ * @author 김재성
+ * @since 2023. 11. 25.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet 
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ *    수정일           수정자               수정내용
+ * -----------     --------    ----------------------
+ * 2023.11.25.       김재성       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Slf4j
+@Controller
+@RequestMapping("/professor/classrooom/test")
+public class ProfessorClassroomTestController {
+	
+	@Inject
+	private ProfessorClassroomTestService testService;
+	
+	private Resource excelFolderForTest;
+	
+	
+	//시험출제 등록
+	@PostMapping("/new")
+	public String createInsertClassroomTest(
+			@Validated(InsertGroup.class) @ModelAttribute("testAddForm") TestQuestionVO testQeust
+			,BindingResult errors
+			,Model model
+	) {
+		String viewName = null;
+		if(!errors.hasErrors() ) {
+			
+			viewName = "jsonView";
+		}else {
+		}
+		return viewName;
+	}
+}

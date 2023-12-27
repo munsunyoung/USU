@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.ac.usu.student.mapper.StaffStudentMapper">
+
+	<resultMap type="kr.ac.usu.user.vo.StudentVO" id="studentMap" autoMapping="true">
+		<id property="stdntNo" column="STDNT_NO"/>
+		<association property="subject" autoMapping="true" />
+	</resultMap>
+
+	<sql id="searchFrag">
+		<where>
+	    	<if test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	    		<choose>
+	    			<when test="simpleCondition.searchType eq 'stdntNm'">
+	    				INSTR(STDNT_NM, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<when test="simpleCondition.searchType eq 'stdntNo'">
+	    				INSTR(STDNT_NO, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<when test="simpleCondition.searchType eq 'sknrgSttusMajor1'">
+	    				INSTR(SUBJCT_NM, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<otherwise>
+	    				INSTR(STDNT_NM, #{simpleCondition.searchWord}) > 0
+	    				OR
+	    				INSTR(STDNT_NO, #{simpleCondition.searchWord}) > 0
+	    				OR
+	    				INSTR(SUBJCT_NM, #{simpleCondition.searchWord}) > 0
+	    			</otherwise>
+	    		</choose>
+	    	</if>
+	    </where>
+	</sql>
+	
+	<sql id="fromFrag">
+		SELECT
+			ROWNUM RNUM
+		    , A.STDNT_NO
+		    , B.STDNT_NM
+		    , B.STDNT_ZIP
+		    , B.STDNT_ADRES1
+		    , B.STDNT_ADRES2
+		    , B.STDNT_TELNO
+		    , B.BANK_SE
+		    , B.STDNT_ACNUTNO
+		    , B.ATCH_FILE_NO
+		    , C.SUBJCT_NM
+		    , E.COM_CODE_NM NLTY_SE
+		    , F.COM_CODE_NM SEXDSTN_SE
+		FROM
+			STUDENT A INNER JOIN STUDENT_INFORMATION B ON(A.STDNT_NO = B.STDNT_NO)
+			INNER JOIN SCHOOL_REGISTER_STATUS D ON(D.STDNT_NO = A.STDNT_NO)
+			INNER JOIN SUBJECT C ON (D.SKNRG_STTUS_MAJOR1 = C.SUBJCT_NO)
+			INNER JOIN COM_CODE E ON (B.NLTY_SE = E.COM_CODE)
+			INNER JOIN COM_CODE F ON (B.SEXDSTN_SE = F.COM_CODE)
+	</sql>
+	
+	<select id="selectTotalRecord" resultType="int" parameterType="kr.ac.usu.paging.vo.PaginationInfo">
+		SELECT COUNT(*)
+		FROM
+			(<include refid="fromFrag" />)
+		<include refid="searchFrag" />
+	</select>
+	
+	<select id="selectStudentList" resultType="kr.ac.usu.user.vo.StudentVO" parameterType="kr.ac.usu.paging.vo.PaginationInfo" resultMap="studentMap">
+		SELECT A.*
+		FROM (
+			<include refid="fromFrag"></include>
+			<include refid="searchFrag" />
+		) A
+		<![CDATA[
+	    WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+	    ]]>
+	</select>
+
+</mapper>
